@@ -616,7 +616,7 @@ function quickRight(q) { document.getElementById('rightsQ').value = q; askRights
 // API
 function sanitizeText(text) {
   if(!text) return text;
-  return text.replace(/\s*[\u2014\u2013]\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  return text.replace(/[ \t]*[\u2014\u2013][ \t]*/g, ' ').replace(/[ \t]{2,}/g, ' ').replace(/\r\n/g, '\n').trim();
 }
 const NO_DASH_RULE = ' Never use em dashes or en dashes anywhere in your response, even as punctuation between clauses or asides. Use commas, colons, or separate sentences instead.';
 async function callClaude(system, user, maxTokens=1000) {
@@ -703,21 +703,40 @@ ${text}`;
 }
 
 function renderContractResult(raw) {
-  const lines = raw.split('\n').filter(l=>l.trim());
+  // Extract RED/AMBER/GREEN clauses by scanning for the labels anywhere in the text,
+  // not just at the start of a line — the model doesn't always put each clause on its
+  // own line, and relying on line-start matching silently drops clauses into stray text.
   const clauses = {red:[],amber:[],green:[]};
+  const labelRe = /(RED|AMBER|GREEN)\s*:\s*/gi;
+  const labelMatches = [...raw.matchAll(labelRe)];
+  let tail = raw;
+  if(labelMatches.length){
+    for(let i=0;i<labelMatches.length;i++){
+      const m = labelMatches[i];
+      const start = m.index + m[0].length;
+      const end = i+1<labelMatches.length ? labelMatches[i+1].index : raw.length;
+      let chunk = raw.slice(start, end);
+      const cut = chunk.search(/\n\s*#{1,3}\s|\n\s*---|\n\s*\n/);
+      let remainder = '';
+      if(cut !== -1){ remainder = chunk.slice(cut); chunk = chunk.slice(0,cut); }
+      const [name,...rest] = chunk.split('::');
+      const item = {name:(name||'').trim(), exp:rest.join('::').trim()};
+      const label = m[1].toUpperCase();
+      if(label==='RED') clauses.red.push(item);
+      else if(label==='AMBER') clauses.amber.push(item);
+      else clauses.green.push(item);
+      if(i===labelMatches.length-1) tail = remainder || '';
+    }
+  }
+  const lines = tail.split('\n').filter(l=>l.trim());
   const others = [];
   lines.forEach(line => {
-    const rm = line.match(/^RED[:\s-]+(.+)/i);
-    const am = line.match(/^AMBER[:\s-]+(.+)/i);
-    const gm = line.match(/^GREEN[:\s-]+(.+)/i);
     const sm = line.match(/^#{1,3}\s+(.+)/);
     const bm = line.match(/^[-•]\s+(.+)/);
-    if(rm) { const [name,...rest]=rm[1].split('::'); clauses.red.push({name:name?.trim(),exp:rest.join('::').trim()}); }
-    else if(am) { const [name,...rest]=am[1].split('::'); clauses.amber.push({name:name?.trim(),exp:rest.join('::').trim()}); }
-    else if(gm) { const [name,...rest]=gm[1].split('::'); clauses.green.push({name:name?.trim(),exp:rest.join('::').trim()}); }
-    else if(sm) others.push({type:'section',text:sm[1].trim()});
+    if(/^(RED|AMBER|GREEN)\s*:/i.test(line.trim())) return;
+    if(sm) others.push({type:'section',text:sm[1].trim()});
     else if(bm) others.push({type:'bullet',text:bm[1].trim()});
-    else if(line.trim()) others.push({type:'para',text:line.trim()});
+    else if(line.trim() && line.trim()!=='---') others.push({type:'para',text:line.trim()});
   });
   const score = Math.min(10, clauses.red.length*2.5 + clauses.amber.length*1);
   const sClass = score>=6?'high':score>=3?'med':'low';
