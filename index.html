@@ -241,6 +241,12 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .glance-headline div{font-size:clamp(0.85rem,4vw,1.15rem);white-space:nowrap;}
 .glance-headline em{color:var(--lime);font-style:normal;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
 </head>
 <body>
 
@@ -367,10 +373,11 @@ textarea::placeholder,input::placeholder{color:#374151;}
   <div class="tool-title">Is this contract<br>safe to sign?</div>
   <div class="tool-sub">Paste any section of your tenancy agreement. We will read it and tell you exactly what to watch out for in plain English.</div>
   <textarea id="contractText" placeholder="Paste your tenancy agreement text here..."></textarea>
-  <div class="upload-hint" onclick="document.getElementById('contractText').focus()">
+  <div class="upload-hint" onclick="document.getElementById('contractPdfInput').click()" style="cursor:pointer;">
     <i class="ti ti-file-upload" aria-hidden="true"></i>
-    <span>Or upload your contract as a PDF instead</span>
+    <span id="uploadHintText">Or upload your contract as a PDF instead</span>
   </div>
+  <input type="file" id="contractPdfInput" accept="application/pdf" style="display:none" onchange="handleContractPdfUpload(event)">
   <button class="btn-primary" onclick="scanContract()" id="scanBtn">Check if this contract is safe to sign</button>
   <button class="btn-ghost" onclick="loadSampleContract()">Load a sample contract to try first</button>
   <div id="contractResult" style="margin-top:1rem;"></div>
@@ -607,15 +614,49 @@ function setFamilyLang(btn,lang) { document.querySelectorAll('.family-card .lang
 function quickRight(q) { document.getElementById('rightsQ').value = q; askRights(); }
 
 // API
+function sanitizeText(text) {
+  if(!text) return text;
+  return text.replace(/\s*[\u2014\u2013]\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+}
+const NO_DASH_RULE = ' Never use em dashes or en dashes anywhere in your response, even as punctuation between clauses or asides. Use commas, colons, or separate sentences instead.';
 async function callClaude(system, user, maxTokens=1000) {
   const r = await fetch('/.netlify/functions/claude-proxy', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({system,messages:[{role:'user',content:user}],maxTokens})
+    body:JSON.stringify({system:system+NO_DASH_RULE,messages:[{role:'user',content:user}],maxTokens})
   });
   if(!r.ok) throw new Error('API error '+r.status);
   const d = await r.json();
-  return d.content.map(b=>b.text||'').join('');
+  return sanitizeText(d.content.map(b=>b.text||'').join(''));
+}
+
+async function handleContractPdfUpload(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const hint = document.getElementById('uploadHintText');
+  hint.textContent = 'Reading ' + file.name + '...';
+  try {
+    if(!window.pdfjsLib) throw new Error('PDF reader did not load');
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+    let fullText = '';
+    for(let i=1; i<=pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(it=>it.str).join(' ') + '\n\n';
+    }
+    fullText = fullText.trim();
+    if(!fullText){
+      hint.textContent = 'Could not find text in this PDF (it may be a scanned image). Please paste the text manually.';
+      return;
+    }
+    document.getElementById('contractText').value = fullText;
+    hint.innerHTML = '<i class=\"ti ti-circle-check\" aria-hidden=\"true\" style=\"color:var(--lime);\"></i> Loaded ' + file.name + ' (' + pdf.numPages + ' page' + (pdf.numPages>1?'s':'') + ')';
+  } catch(err) {
+    hint.textContent = 'Could not read this PDF. Please try again or paste the text manually.';
+  } finally {
+    event.target.value = '';
+  }
 }
 
 function showLoading(id, msg) {
@@ -635,9 +676,9 @@ async function scanContract() {
   try {
     const sys = 'You are a UK tenancy law expert specialising in the Renters Rights Act 2025 which came into force 1 May 2026. Explain everything in plain English a first-time renter would understand. Never use legal jargon.';
     const prompt = `Analyse this tenancy agreement. For each issue use EXACTLY this format on a new line:
-RED: [clause name] — [plain English explanation under 25 words of why this is illegal or very unfair]
-AMBER: [clause name] — [plain English explanation under 25 words of the risk]
-GREEN: [clause name] — [plain English confirmation under 20 words that this is fair]
+RED: [clause name] :: [plain English explanation under 25 words of why this is illegal or very unfair]
+AMBER: [clause name] :: [plain English explanation under 25 words of the risk]
+GREEN: [clause name] :: [plain English confirmation under 20 words that this is fair]
 
 Then write:
 ## Summary
@@ -671,9 +712,9 @@ function renderContractResult(raw) {
     const gm = line.match(/^GREEN[:\s-]+(.+)/i);
     const sm = line.match(/^#{1,3}\s+(.+)/);
     const bm = line.match(/^[-•]\s+(.+)/);
-    if(rm) { const [name,...rest]=rm[1].split('—'); clauses.red.push({name:name?.trim(),exp:rest.join('—').trim()}); }
-    else if(am) { const [name,...rest]=am[1].split('—'); clauses.amber.push({name:name?.trim(),exp:rest.join('—').trim()}); }
-    else if(gm) { const [name,...rest]=gm[1].split('—'); clauses.green.push({name:name?.trim(),exp:rest.join('—').trim()}); }
+    if(rm) { const [name,...rest]=rm[1].split('::'); clauses.red.push({name:name?.trim(),exp:rest.join('::').trim()}); }
+    else if(am) { const [name,...rest]=am[1].split('::'); clauses.amber.push({name:name?.trim(),exp:rest.join('::').trim()}); }
+    else if(gm) { const [name,...rest]=gm[1].split('::'); clauses.green.push({name:name?.trim(),exp:rest.join('::').trim()}); }
     else if(sm) others.push({type:'section',text:sm[1].trim()});
     else if(bm) others.push({type:'bullet',text:bm[1].trim()});
     else if(line.trim()) others.push({type:'para',text:line.trim()});
@@ -752,9 +793,9 @@ async function checkScam() {
     }
     const situationText = text || `(No description provided - only a listing link was pasted: ${link})`;
     const prompt = `Analyse this rental situation for scam indicators. Give verdict first as EXACTLY one of:
-RED: HIGH SCAM RISK — [one sentence why]
-AMBER: PROCEED WITH CAUTION — [one sentence why]
-GREEN: APPEARS LEGITIMATE — [one sentence why]
+RED: HIGH SCAM RISK :: [one sentence why]
+AMBER: PROCEED WITH CAUTION :: [one sentence why]
+GREEN: APPEARS LEGITIMATE :: [one sentence why]
 
 Then write:
 ## Scam indicators found
@@ -942,9 +983,9 @@ async function sendChat() {
   document.getElementById('chatMsgs').scrollTop = 999999;
   try {
     const sys = 'You are NestSafe AI, a friendly UK housing rights assistant. Plain English. Under 80 words. Warm, direct, practical. Reference the Renters Rights Act 2025 where relevant. Reply in the same language the user writes in.';
-    const r = await fetch('/.netlify/functions/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:chatHistory,maxTokens:300})});
+    const r = await fetch('/.netlify/functions/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys+NO_DASH_RULE,messages:chatHistory,maxTokens:300})});
     const d = await r.json();
-    const reply = d.content.map(b=>b.text||'').join('');
+    const reply = sanitizeText(d.content.map(b=>b.text||'').join(''));
     document.getElementById('typing')?.remove();
     chatHistory.push({role:'assistant',content:reply});
     addChatMsg(reply, false);
