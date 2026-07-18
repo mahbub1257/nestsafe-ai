@@ -385,7 +385,9 @@ textarea::placeholder,input::placeholder{color:#374151;}
     <div class="prog-bar"><span class="pb-active"></span><span class="pb-todo"></span><span class="pb-todo"></span></div>
   </div>
   <div class="tool-title">Is this listing real?</div>
-  <div class="tool-sub">Describe the listing or landlord situation. We will check it against known scam patterns and tell you what to do next.</div>
+  <div class="tool-sub">Paste the listing link and/or describe the listing or landlord situation. We will check it against known scam patterns and tell you what to do next.</div>
+  <input type="text" id="scamLink" placeholder="Paste the listing link (Rightmove, Zoopla, OpenRent, Facebook Marketplace, Gumtree, SpareRoom, OnTheMarket...)" oninput="onScamLinkInput()" style="margin-bottom:0.6rem;">
+  <div id="scamPlatformBadge" style="display:none;font-size:0.78rem;color:var(--lime);margin-bottom:0.75rem;"></div>
   <textarea id="scamText" placeholder="e.g. Found a 2-bed flat on Facebook for £700 per month. Landlord says they are abroad and will post keys after I pay two months deposit today..."></textarea>
   <button class="btn-primary" onclick="checkScam()" id="scamBtn">Check if this listing is real</button>
   <button class="btn-ghost" onclick="loadSampleScam()">Load a sample listing to try first</button>
@@ -572,6 +574,34 @@ function goToTool(tool) {
 
 function loadSampleContract() { document.getElementById('contractText').value = SAMPLE_CONTRACT; }
 function loadSampleScam() { document.getElementById('scamText').value = SAMPLE_SCAM; }
+
+const SCAM_PLATFORMS = [
+  {match:/rightmove\.co\.uk/i, name:'Rightmove'},
+  {match:/zoopla\.co\.uk/i, name:'Zoopla'},
+  {match:/openrent\.co\.uk/i, name:'OpenRent'},
+  {match:/spareroom\.co\.uk/i, name:'SpareRoom'},
+  {match:/onthemarket\.com/i, name:'OnTheMarket'},
+  {match:/gumtree\.com/i, name:'Gumtree'},
+  {match:/facebook\.com/i, name:'Facebook Marketplace'}
+];
+
+function detectScamPlatform(url) {
+  if(!url) return null;
+  for(const p of SCAM_PLATFORMS){ if(p.match.test(url)) return p.name; }
+  try { const host = new URL(url).hostname.replace('www.',''); return host; } catch(e){ return null; }
+}
+
+function onScamLinkInput() {
+  const url = document.getElementById('scamLink').value.trim();
+  const badge = document.getElementById('scamPlatformBadge');
+  const platform = detectScamPlatform(url);
+  if(platform){
+    badge.style.display = 'block';
+    badge.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Detected: ' + platform + ' listing';
+  } else {
+    badge.style.display = 'none';
+  }
+}
 function setRightsLang(btn,lang) { document.querySelectorAll('#screen-rights .lang-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); rightsLang=lang; }
 function setFamilyLang(btn,lang) { document.querySelectorAll('.family-card .lang-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); familyLang=lang; }
 function quickRight(q) { document.getElementById('rightsQ').value = q; askRights(); }
@@ -705,12 +735,22 @@ async function translateResult(btn, lang) {
 // SCAM CHECK
 async function checkScam() {
   const text = document.getElementById('scamText').value.trim();
-  if(!text){showError('scamResult','Please describe the listing first.');return;}
+  const link = document.getElementById('scamLink').value.trim();
+  const platform = detectScamPlatform(link);
+  if(!text && !link){showError('scamResult','Please describe the listing or paste a link first.');return;}
   const btn = document.getElementById('scamBtn');
   btn.disabled=true;btn.textContent='Checking...';
   showLoading('scamResult','Checking for known UK rental scam patterns...');
   try {
     const sys = 'You are a UK rental fraud expert. Over £1M is lost to student rental scams in the UK every year. Be direct, honest and always act in the student\'s best interest.';
+    let platformNote = '';
+    if(platform){
+      const note = platform === 'Facebook Marketplace'
+        ? 'Facebook Marketplace has no landlord or listing verification of any kind, so extra caution is always warranted.'
+        : 'Reputable portals like this typically require agents to be registered with a redress scheme (The Property Ombudsman or PRS) - remind the student to check for this.';
+      platformNote = `The student found this via ${platform}. Note: ${note}\n\n`;
+    }
+    const situationText = text || `(No description provided - only a listing link was pasted: ${link})`;
     const prompt = `Analyse this rental situation for scam indicators. Give verdict first as EXACTLY one of:
 RED: HIGH SCAM RISK — [one sentence why]
 AMBER: PROCEED WITH CAUTION — [one sentence why]
@@ -728,8 +768,8 @@ Then write:
 - [action 2]
 - [action 3]
 
-Situation:
-${text}`;
+${platformNote}Situation:
+${situationText}`;
     const result = await callClaude(sys, prompt);
     lastScamResult = result;
     document.getElementById('scamResult').innerHTML = renderScamResult(result);
