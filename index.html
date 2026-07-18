@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NestSafe AI — Student Accommodation Protection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231A7A4A'/><text y='75' x='15' font-size='65'>🛡</text></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#0D1117;--green:#1A7A4A;--lime:#00FF87;--white:#ffffff;
+  --surface:#0D1117;--card:#161B22;--border:#1F2937;--muted:#6B7280;
+  --danger:#EF4444;--amber:#F59E0B;--lgreen:#10B981;
+  --bg-d:rgba(220,38,38,0.08);--bg-a:rgba(245,158,11,0.06);--bg-g:rgba(16,185,129,0.06);
+  --bd-d:rgba(220,38,38,0.2);--bd-a:rgba(245,158,11,0.15);--bd-g:rgba(16,185,129,0.15);
+  --text-d:#FCA5A5;--text-a:#FCD34D;--text-g:#6EE7B7;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--white);min-height:100vh;line-height:1.6;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-up{animation:fadeUp 0.4s ease forwards;}
+.fade-up-1{animation:fadeUp 0.4s 0.08s ease both;}
+.fade-up-2{animation:fadeUp 0.4s 0.16s ease both;}
+.fade-up-3{animation:fadeUp 0.4s 0.24s ease both;}
+
+/* HEADER */
+header{background:var(--ink);padding:0.85rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--white);letter-spacing:-0.5px;}
+.logo span{color:var(--lime);}
+.header-right{display:flex;align-items:center;gap:8px;position:relative;}
+#loginBtn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 12px;cursor:pointer;transition:all 0.2s;}
+#loginBtn:hover{background:rgba(255,255,255,0.1);}
+#loginBtn span{font-size:12px;color:var(--white);}
+#loginDropdown{display:none;position:absolute;top:44px;right:0;width:230px;background:#161B22;border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:999;}
+.drop-header{padding:10px 14px;border-bottom:1px solid var(--border);}
+.drop-header p{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+.drop-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:all 0.15s;}
+.drop-item:hover{background:rgba(255,255,255,0.04);}
+.drop-item.featured{border-left-color:var(--lime);background:rgba(0,255,135,0.05);}
+.drop-item i{font-size:16px;color:var(--muted);}
+.drop-item.featured i{color:var(--lime);}
+.drop-item .dt{font-size:12px;font-weight:600;color:var(--white);}
+.drop-item .ds{font-size:10px;color:var(--muted);margin-top:1px;}
+.drop-divider{height:1px;background:var(--border);margin:4px 0;}
+.drop-signout{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;}
+.drop-signout i{font-size:14px;color:var(--danger);}
+.drop-signout span{font-size:12px;color:var(--danger);}
+
+/* SCREENS */
+.screen{display:none;max-width:500px;margin:0 auto;padding:1.5rem 1rem 5rem;}
+.screen.active{display:block;}
+
+/* SCREEN 1 — MOOD */
+.mood-hero{text-align:center;padding:2rem 0 1rem;}
+.mood-icon{width:56px;height:56px;background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.15);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;}
+.mood-icon i{font-size:24px;color:var(--lime);}
+.mood-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);line-height:1.25;margin-bottom:0.5rem;}
+.mood-sub{font-size:0.88rem;color:var(--muted);line-height:1.7;}
+.mood-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:1.25rem 0;}
+.mood-btn{padding:1rem 0.5rem;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+.mood-btn:hover{transform:translateY(-2px);}
+.mood-btn .emoji{font-size:2rem;display:block;margin-bottom:0.4rem;}
+.mood-btn .label{font-size:0.82rem;font-weight:600;}
+.mood-stressed{background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.2);}.mood-stressed .label{color:var(--text-d);}
+.mood-worried{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);}.mood-worried .label{color:var(--text-a);}
+.mood-fine{background:rgba(0,255,135,0.06);border-color:rgba(0,255,135,0.18);}.mood-fine .label{color:var(--lime);}
+.mood-tip{background:rgba(0,255,135,0.05);border:1px solid rgba(0,255,135,0.12);border-radius:10px;padding:0.85rem 1rem;font-size:0.82rem;color:var(--lime);line-height:1.6;margin-top:0.5rem;}
+.privacy-note{text-align:center;font-size:0.75rem;color:#374151;margin-top:1rem;}
+
+/* SCREEN 2 — SITUATION */
+.sit-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.9rem 1rem;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+.sit-card:hover{border-color:rgba(0,255,135,0.3);transform:translateY(-1px);}
+.sit-card.highlighted{border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.04);}
+.sit-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.si-red{background:rgba(220,38,38,0.12);}
+.si-amber{background:rgba(245,158,11,0.1);}
+.si-green{background:rgba(0,255,135,0.08);}
+.sit-text .t{font-size:0.9rem;font-weight:600;color:var(--white);}
+.sit-text .s{font-size:0.78rem;color:var(--muted);margin-top:2px;}
+.sit-arrow{margin-left:auto;font-size:1rem;color:#374151;}
+.bottom-tip{display:flex;align-items:center;gap:8px;padding:0.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-top:1rem;}
+.bottom-tip i{font-size:16px;color:var(--lime);flex-shrink:0;}
+.bottom-tip span{font-size:0.78rem;color:var(--muted);line-height:1.5;}
+
+/* PROGRESS */
+.progress-section{margin-bottom:1.25rem;}
+.prog-label{font-size:0.72rem;color:var(--lime);letter-spacing:0.06em;text-align:center;margin-bottom:6px;font-weight:600;}
+.prog-bar{display:flex;gap:4px;}
+.prog-bar span{flex:1;height:2px;border-radius:2px;}
+.pb-done{background:var(--green);}
+.pb-active{background:var(--lime);}
+.pb-todo{background:var(--border);}
+
+/* TOOL SCREENS */
+.tool-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;color:var(--white);line-height:1.3;margin-bottom:0.4rem;}
+.tool-sub{font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:1rem;}
+textarea,input[type=text],input[type=number]{width:100%;padding:0.8rem;border:1px solid var(--border);border-radius:9px;font-size:0.85rem;color:var(--white);background:#0D1117;font-family:'Inter',inherit;transition:border-color 0.2s;resize:vertical;}
+textarea{min-height:110px;}
+textarea:focus,input:focus{outline:none;border-color:var(--lime);box-shadow:0 0 0 3px rgba(0,255,135,0.08);}
+textarea::placeholder,input::placeholder{color:#374151;}
+.upload-hint{display:flex;align-items:center;gap:8px;padding:0.65rem 0.9rem;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);border-radius:8px;margin-top:0.6rem;cursor:pointer;}
+.upload-hint i{font-size:14px;color:var(--text-a);}
+.upload-hint span{font-size:0.8rem;color:var(--text-a);}
+.btn-primary{width:100%;padding:0.85rem;background:var(--lime);color:#0D0D0D;border:none;border-radius:9px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Inter',inherit;margin-top:0.75rem;}
+.btn-primary:hover{background:#00E87A;transform:translateY(-1px);}
+.btn-primary:disabled{background:#1F2937;color:var(--muted);cursor:not-allowed;transform:none;}
+.btn-ghost{width:100%;padding:0.75rem;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:9px;font-size:0.85rem;cursor:pointer;font-family:'Inter',inherit;margin-top:0.5rem;transition:all 0.2s;}
+.btn-ghost:hover{border-color:var(--lime);color:var(--lime);}
+.back-link{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:0.82rem;cursor:pointer;margin-bottom:1rem;width:fit-content;}
+.back-link:hover{color:var(--white);}
+
+/* RESULTS */
+.score-box{background:linear-gradient(135deg,#0D1F12,#0D1117);border:1px solid rgba(0,255,135,0.18);border-radius:12px;padding:1.1rem;text-align:center;margin-bottom:1rem;}
+.score-num{font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;line-height:1;}
+.score-lbl{font-size:0.75rem;color:var(--muted);margin-top:4px;}
+.score-verdict{display:inline-block;font-size:0.78rem;font-weight:700;padding:4px 14px;border-radius:100px;margin-top:8px;}
+.sv-high{background:rgba(220,38,38,0.15);color:var(--text-d);}
+.sv-med{background:rgba(245,158,11,0.12);color:var(--text-a);}
+.sv-low{background:rgba(16,185,129,0.12);color:var(--text-g);}
+.sn-high{color:var(--danger);}
+.sn-med{color:var(--amber);}
+.sn-low{color:var(--lgreen);}
+.result-intro{margin-bottom:1rem;}
+.result-intro .rt{font-size:1rem;font-weight:600;color:var(--white);}
+.result-intro .rs{font-size:0.82rem;color:var(--muted);margin-top:3px;line-height:1.5;}
+
+/* ACCORDION */
+.acc{border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;transition:all 0.15s;}
+.acc-header:hover{opacity:0.9;}
+.acc-r{background:var(--bg-d);border:1px solid var(--bd-d);}
+.acc-a{background:var(--bg-a);border:1px solid var(--bd-a);}
+.acc-g{background:var(--bg-g);border:1px solid var(--bd-g);}
+.acc-left{display:flex;align-items:center;gap:8px;}
+.acc-badge{font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:100px;}
+.ab-r{background:#FCA5A5;color:#7F1D1D;}
+.ab-a{background:#FCD34D;color:#713F12;}
+.ab-g{background:#6EE7B7;color:#064E3B;}
+.acc-title{font-size:0.82rem;font-weight:600;}
+.at-r{color:var(--text-d);}
+.at-a{color:var(--text-a);}
+.at-g{color:var(--text-g);}
+.acc-right{display:flex;align-items:center;gap:6px;}
+.acc-count{font-size:0.78rem;color:var(--muted);}
+.acc-chevron{font-size:0.75rem;color:var(--muted);transition:transform 0.2s;}
+.acc-chevron.open{transform:rotate(180deg);}
+.acc-body{display:none;padding:0.75rem 1rem;border-top:none;}
+.acc-body.show{display:block;}
+.acc-body-r{background:rgba(220,38,38,0.04);border:1px solid var(--bd-d);border-top:none;border-radius:0 0 10px 10px;}
+.acc-body-a{background:rgba(245,158,11,0.03);border:1px solid var(--bd-a);border-top:none;border-radius:0 0 10px 10px;}
+.acc-body-g{background:rgba(16,185,129,0.03);border:1px solid var(--bd-g);border-top:none;border-radius:0 0 10px 10px;}
+.clause-item{display:flex;gap:10px;align-items:flex-start;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.clause-item:last-child{border-bottom:none;}
+.clause-dot{width:3px;height:3px;border-radius:50%;flex-shrink:0;margin-top:7px;}
+.cd-r{background:var(--danger);}
+.cd-a{background:var(--amber);}
+.cd-g{background:var(--lgreen);}
+.clause-text{font-size:0.82rem;color:rgba(255,255,255,0.85);line-height:1.4;font-weight:500;}
+.clause-exp{font-size:0.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+/* TRANSLATE */
+.lang-section{margin:1rem 0;}
+.lang-label{font-size:0.72rem;color:var(--muted);margin-bottom:6px;}
+.lang-row{display:flex;gap:6px;flex-wrap:wrap;}
+.lang-pill{padding:5px 10px;border-radius:100px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:all 0.2s;}
+.lang-pill.active,.lang-pill:hover{background:var(--lime);color:#0D0D0D;border-color:var(--lime);}
+
+/* NEXT STEPS */
+.next-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1rem;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s;margin-bottom:8px;}
+.next-card:hover{border-color:rgba(0,255,135,0.25);transform:translateY(-1px);}
+.next-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ni-a{background:rgba(245,158,11,0.1);}
+.ni-g{background:rgba(0,255,135,0.08);}
+.ni-b{background:rgba(59,130,246,0.08);}
+.ni-r{background:rgba(220,38,38,0.1);}
+.next-text .nt{font-size:0.85rem;font-weight:600;color:var(--white);}
+.next-text .ns{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+.next-arr{margin-left:auto;color:#374151;font-size:1rem;}
+
+/* FAMILY CARD */
+.family-card{background:linear-gradient(135deg,#0D2518,#0D1117);border:1px solid rgba(0,255,135,0.18);border-radius:12px;padding:1.1rem;margin-top:1rem;}
+.fc-title{font-size:0.9rem;font-weight:600;color:var(--white);margin-bottom:4px;}
+.fc-sub{font-size:0.8rem;color:var(--muted);line-height:1.5;margin-bottom:0.85rem;}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:0.8rem;background:#25D366;color:var(--white);border:none;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Inter',inherit;}
+.wa-btn:hover{background:#128C7E;}
+.skip-link{text-align:center;font-size:0.78rem;color:#374151;cursor:pointer;margin-top:0.75rem;padding:0.5rem;}
+.skip-link:hover{color:var(--muted);}
+
+/* LOADING */
+.loading{text-align:center;padding:2.5rem;background:var(--card);border:1px solid var(--border);border-radius:12px;}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--lime);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 0.85rem;}
+.loading p{font-size:0.85rem;color:var(--muted);}
+.loading small{font-size:0.75rem;color:#374151;margin-top:4px;display:block;}
+.error-msg{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:0.85rem 1rem;font-size:0.83rem;color:var(--text-d);}
+
+/* DISCLAIMER */
+.disclaimer{font-size:0.72rem;color:#374151;line-height:1.6;text-align:center;margin-top:1rem;}
+
+/* CHAT */
+#chatToggle{position:fixed;bottom:24px;right:20px;width:52px;height:52px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;box-shadow:0 4px 16px rgba(26,122,74,0.35);transition:all 0.2s;}
+#chatToggle:hover{background:#145C37;transform:scale(1.05);}
+#chatWindow{display:none;position:fixed;bottom:88px;right:16px;width:300px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.3);animation:fadeUp 0.2s ease;}
+.chat-head{background:var(--ink);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.chat-avatar{width:30px;height:30px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-info .cn{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--white);}
+.chat-info .cs{font-size:10px;color:var(--lime);}
+.chat-close{cursor:pointer;color:var(--muted);font-size:16px;}
+.chat-msgs{height:240px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;background:#0A0F14;}
+.msg-ai,.msg-user{display:flex;gap:7px;align-items:flex-start;}
+.msg-user{flex-direction:row-reverse;}
+.msg-bubble-ai{background:var(--card);border:1px solid var(--border);border-radius:10px;border-bottom-left-radius:2px;padding:8px 10px;max-width:82%;font-size:11px;color:rgba(255,255,255,0.85);line-height:1.6;}
+.msg-bubble-user{background:var(--green);border-radius:10px;border-bottom-right-radius:2px;padding:8px 10px;max-width:82%;font-size:11px;color:var(--white);line-height:1.6;}
+.msg-avatar{width:24px;height:24px;background:var(--green);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.chat-input{padding:8px 10px;border-top:1px solid var(--border);background:var(--card);display:flex;gap:7px;}
+.chat-input input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--white);background:#0D1117;font-family:'Inter',inherit;}
+.chat-input input:focus{outline:none;border-color:var(--lime);}
+.chat-send{width:32px;height:32px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;}
+.chat-send:hover{background:#145C37;}
+
+/* MOOD SUPPORT */
+.mood-support{border-radius:10px;padding:0.85rem 1rem;margin-top:0.75rem;font-size:0.83rem;line-height:1.6;}
+.ms-stressed{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:var(--text-d);}
+.ms-worried{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.18);color:var(--text-a);}
+.ms-fine{background:rgba(0,255,135,0.06);border:1px solid rgba(0,255,135,0.15);color:var(--lime);}
+.ms-title{font-weight:700;margin-bottom:4px;}
+
+.live-strip{display:flex;align-items:center;justify-content:center;gap:6px;padding:5px 10px;border-radius:100px;background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.18);width:fit-content;margin:0 auto 10px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--lime);display:inline-block;animation:pulseDot 2s infinite;}
+@keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-strip span{font-size:10px;color:var(--lime);font-weight:600;}
+.trust-strip{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 12px;border-radius:10px;background:rgba(0,255,135,0.04);width:fit-content;margin:0 auto 1rem;}
+.trust-strip i{font-size:12px;color:var(--lime);}
+.trust-strip span{font-size:10.5px;color:var(--lime);font-weight:600;text-align:center;}
+
+.glance-headline{font-family:'Syne',sans-serif;font-weight:800;line-height:1.3;letter-spacing:-0.3px;color:var(--white);text-align:center;padding:1.5rem 0.75rem 0;margin-bottom:14px;}
+.glance-headline div{font-size:clamp(0.85rem,4vw,1.15rem);white-space:nowrap;}
+.glance-headline em{color:var(--lime);font-style:normal;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Nest<span>Safe</span> AI</div>
+  <div class="header-right">
+    <div id="loginBtn" onclick="toggleDropdown()">
+      <i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i>
+      <span id="loginLabel">Sign in</span>
+      <i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:var(--muted);transition:transform 0.2s;" aria-hidden="true"></i>
+    </div>
+    <div id="loginDropdown">
+      <div id="signedOutMenu">
+        <div class="drop-header"><p>Sign in as</p></div>
+        <div class="drop-item featured" onclick="signIn('student','Student','ti-school')">
+          <i class="ti ti-school" aria-hidden="true"></i>
+          <div><div class="dt">Student</div><div class="ds">Contract scanner and rights guide</div></div>
+        </div>
+        <div class="drop-item" onclick="signIn('parent','Parent or family','ti-users')">
+          <i class="ti ti-users" aria-hidden="true"></i>
+          <div><div class="dt">Parent or family</div><div class="ds">Track accommodation safety</div></div>
+        </div>
+        <div class="drop-item" onclick="signIn('university','University','ti-building')">
+          <i class="ti ti-building" aria-hidden="true"></i>
+          <div><div class="dt">University</div><div class="ds">Institution dashboard</div></div>
+        </div>
+        <div class="drop-item" onclick="signIn('union','Student union','ti-speakerphone')">
+          <i class="ti ti-speakerphone" aria-hidden="true"></i>
+          <div><div class="dt">Student union</div><div class="ds">Welfare dashboard</div></div>
+        </div>
+        <div class="drop-item" onclick="signIn('agent','Recruitment agent','ti-plane')">
+          <i class="ti ti-plane" aria-hidden="true"></i>
+          <div><div class="dt">Recruitment agent</div><div class="ds">Pre-arrival safety module</div></div>
+        </div>
+      </div>
+      <div id="signedInMenu" style="display:none;">
+        <div class="drop-header">
+          <div id="siName" style="font-size:12px;font-weight:600;color:var(--white);"></div>
+          <div id="siRole" style="font-size:10px;color:var(--lime);margin-top:1px;"></div>
+        </div>
+        <div class="drop-item" onclick="closeDropdown()"><i class="ti ti-user" aria-hidden="true"></i><div><div class="dt">My profile</div></div></div>
+        <div class="drop-item" onclick="switchRole()"><i class="ti ti-refresh" aria-hidden="true"></i><div><div class="dt">Switch role</div></div></div>
+        <div class="drop-divider"></div>
+        <div class="drop-signout" onclick="signOut()"><i class="ti ti-logout" aria-hidden="true"></i><span>Sign out</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SCREEN 1: MOOD CHECK -->
+<div id="screen-mood" class="screen active">
+  <div class="glance-headline fade-up">
+    <div>Don't sign until <em>NestSafe&nbsp;AI</em></div>
+    <div>reads it first.</div>
+  </div>
+  <div class="live-strip fade-up">
+    <span class="live-dot" aria-hidden="true"></span>
+    <span>2,847 contracts scanned this week</span>
+  </div>
+  <div class="trust-strip fade-up">
+    <i class="ti ti-shield-check" aria-hidden="true"></i>
+    <span>Free for every student &middot; Paid for by your university</span>
+  </div>
+  <div class="mood-hero fade-up">
+    <div class="mood-icon"><i class="ti ti-home" aria-hidden="true"></i></div>
+    <div class="mood-title">How are you feeling<br>about your housing?</div>
+    <div class="mood-sub" style="margin-top:0.5rem;">We will take you to exactly<br>what you need right now.</div>
+  </div>
+  <div class="mood-grid fade-up-1">
+    <div class="mood-btn mood-stressed" onclick="chooseMood('stressed')">
+      <span class="emoji">😰</span>
+      <span class="label">Stressed</span>
+    </div>
+    <div class="mood-btn mood-worried" onclick="chooseMood('worried')">
+      <span class="emoji">😟</span>
+      <span class="label">Worried</span>
+    </div>
+    <div class="mood-btn mood-fine" onclick="chooseMood('fine')">
+      <span class="emoji">😊</span>
+      <span class="label">Fine</span>
+    </div>
+  </div>
+  <div id="moodSupport" style="display:none;"></div>
+  <div class="mood-tip fade-up-2">78% of students who got housing support stayed in education. You are in the right place.</div>
+  <div class="privacy-note fade-up-3">Your answer is completely private</div>
+</div>
+
+<!-- SCREEN 2: SITUATION -->
+<div id="screen-situation" class="screen">
+  <div class="fade-up" style="text-align:center;padding:1.5rem 0 1.25rem;">
+    <div class="mood-title" style="font-size:1.3rem;">Where are you in your<br>housing journey?</div>
+    <div class="mood-sub" style="margin-top:0.4rem;">We will take you straight to the right tool.</div>
+  </div>
+  <div class="fade-up-1">
+    <div class="sit-card" onclick="goToTool('scam')">
+      <div class="sit-icon si-red"><i class="ti ti-search" style="color:var(--text-d);font-size:16px;" aria-hidden="true"></i></div>
+      <div class="sit-text"><div class="t">Still looking for a place</div><div class="s">Check if a listing is real before you pay anything</div></div>
+      <div class="sit-arrow">›</div>
+    </div>
+    <div class="sit-card highlighted" onclick="goToTool('contract')">
+      <div class="sit-icon si-amber"><i class="ti ti-file-text" style="color:var(--text-a);font-size:16px;" aria-hidden="true"></i></div>
+      <div class="sit-text"><div class="t">Found a place to check</div><div class="s">Is this contract safe to sign?</div></div>
+      <div class="sit-arrow">›</div>
+    </div>
+    <div class="sit-card" onclick="goToTool('rights')">
+      <div class="sit-icon si-green"><i class="ti ti-pen" style="color:var(--lime);font-size:16px;" aria-hidden="true"></i></div>
+      <div class="sit-text"><div class="t">Already signed my contract</div><div class="s">Get help and know your rights</div></div>
+      <div class="sit-arrow">›</div>
+    </div>
+  </div>
+  <div class="bottom-tip fade-up-2">
+    <i class="ti ti-shield-check" aria-hidden="true"></i>
+    <span>Over £1M lost to student rental scams in the UK every year. Checking first is always the right decision.</span>
+  </div>
+</div>
+
+<!-- SCREEN 3: CONTRACT TOOL -->
+<div id="screen-contract" class="screen">
+  <div class="back-link" onclick="goBack('situation')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
+  <div class="progress-section">
+    <div class="prog-label">Step 1 of 3 — Paste your contract</div>
+    <div class="prog-bar"><span class="pb-active"></span><span class="pb-todo"></span><span class="pb-todo"></span></div>
+  </div>
+  <div class="tool-title">Is this contract<br>safe to sign?</div>
+  <div class="tool-sub">Paste any section of your tenancy agreement. We will read it and tell you exactly what to watch out for in plain English.</div>
+  <textarea id="contractText" placeholder="Paste your tenancy agreement text here..."></textarea>
+  <div class="upload-hint" onclick="document.getElementById('contractText').focus()">
+    <i class="ti ti-file-upload" aria-hidden="true"></i>
+    <span>Or upload your contract as a PDF instead</span>
+  </div>
+  <button class="btn-primary" onclick="scanContract()" id="scanBtn">Check if this contract is safe to sign</button>
+  <button class="btn-ghost" onclick="loadSampleContract()">Load a sample contract to try first</button>
+  <div id="contractResult" style="margin-top:1rem;"></div>
+  <div class="disclaimer">NestSafe AI provides information only, not legal advice. For high stakes decisions always consult a qualified solicitor.</div>
+</div>
+
+<!-- SCREEN 4: SCAM TOOL -->
+<div id="screen-scam" class="screen">
+  <div class="back-link" onclick="goBack('situation')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
+  <div class="progress-section">
+    <div class="prog-label">Step 1 of 3 — Describe the listing</div>
+    <div class="prog-bar"><span class="pb-active"></span><span class="pb-todo"></span><span class="pb-todo"></span></div>
+  </div>
+  <div class="tool-title">Is this listing real?</div>
+  <div class="tool-sub">Describe the listing or landlord situation. We will check it against known scam patterns and tell you what to do next.</div>
+  <textarea id="scamText" placeholder="e.g. Found a 2-bed flat on Facebook for £700 per month. Landlord says they are abroad and will post keys after I pay two months deposit today..."></textarea>
+  <button class="btn-primary" onclick="checkScam()" id="scamBtn">Check if this listing is real</button>
+  <button class="btn-ghost" onclick="loadSampleScam()">Load a sample listing to try first</button>
+  <div id="scamResult" style="margin-top:1rem;"></div>
+  <div class="disclaimer">Never pay a deposit before viewing a property in person. Report fraud to Action Fraud at actionfraud.police.uk</div>
+</div>
+
+<!-- SCREEN 5: RIGHTS TOOL -->
+<div id="screen-rights" class="screen">
+  <div class="back-link" onclick="goBack('situation')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
+  <div class="progress-section">
+    <div class="prog-label">Step 1 of 3 — Your question</div>
+    <div class="prog-bar"><span class="pb-active"></span><span class="pb-todo"></span><span class="pb-todo"></span></div>
+  </div>
+  <div class="tool-title">We are here to help.</div>
+  <div class="tool-sub">Ask any question about your tenancy rights under the Renters Rights Act 2025. Plain English. In your language.</div>
+  <div class="lang-section">
+    <div class="lang-label">Answer in:</div>
+    <div class="lang-row">
+      <div class="lang-pill active" onclick="setRightsLang(this,'en')">🇬🇧 English</div>
+      <div class="lang-pill" onclick="setRightsLang(this,'fr')">🇫🇷 French</div>
+      <div class="lang-pill" onclick="setRightsLang(this,'es')">🇪🇸 Spanish</div>
+      <div class="lang-pill" onclick="setRightsLang(this,'zh')">🇨🇳 Chinese</div>
+      <div class="lang-pill" onclick="setRightsLang(this,'hi')">🇮🇳 Hindi</div>
+    </div>
+  </div>
+  <input type="text" id="rightsQ" placeholder="e.g. Can my landlord enter without notice?" onkeydown="if(event.key==='Enter')askRights()"/>
+  <button class="btn-primary" onclick="askRights()" id="rightsBtn" style="margin-top:0.75rem;">Get my answer</button>
+  <div id="rightsResult" style="margin-top:1rem;"></div>
+  <div class="card" style="margin-top:1rem;">
+    <div style="font-size:0.82rem;font-weight:600;color:var(--white);margin-bottom:0.75rem;">Common questions</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div class="sit-card" style="padding:0.65rem 0.85rem;" onclick="quickRight('Can my landlord enter my flat without giving me notice?')"><div class="sit-text"><div class="t" style="font-size:0.82rem;">Can my landlord enter without notice?</div></div><div class="sit-arrow">›</div></div>
+      <div class="sit-card" style="padding:0.65rem 0.85rem;" onclick="quickRight('What is the maximum legal deposit my landlord can charge?')"><div class="sit-text"><div class="t" style="font-size:0.82rem;">What is the maximum legal deposit?</div></div><div class="sit-arrow">›</div></div>
+      <div class="sit-card" style="padding:0.65rem 0.85rem;" onclick="quickRight('Can I challenge a rent increase from my landlord?')"><div class="sit-text"><div class="t" style="font-size:0.82rem;">Can I challenge a rent increase?</div></div><div class="sit-arrow">›</div></div>
+      <div class="sit-card" style="padding:0.65rem 0.85rem;" onclick="quickRight('What happens if my landlord does not fix a repair?')"><div class="sit-text"><div class="t" style="font-size:0.82rem;">What if my landlord ignores a repair?</div></div><div class="sit-arrow">›</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 6: NEXT STEPS -->
+<div id="screen-nextsteps" class="screen">
+  <div class="back-link" onclick="goBack('contract')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to results</div>
+  <div class="progress-section">
+    <div class="prog-label">Step 3 of 3 — What to do next</div>
+    <div class="prog-bar"><span class="pb-done"></span><span class="pb-done"></span><span class="pb-active"></span></div>
+  </div>
+  <div class="tool-title fade-up">You have the right to ask<br>questions before signing.</div>
+  <div class="tool-sub fade-up-1">Most landlords expect this. It is not rude to ask. Here is exactly what to do next.</div>
+  <div class="fade-up-1">
+    <div class="next-card" onclick="showNextSection('questions')">
+      <div class="next-icon ni-a"><i class="ti ti-message-2" style="font-size:15px;color:var(--text-a);" aria-hidden="true"></i></div>
+      <div class="next-text"><div class="nt">Questions to ask your landlord</div><div class="ns">3 specific questions based on your contract</div></div>
+      <div class="next-arr">›</div>
+    </div>
+    <div class="next-card" onclick="showNextSection('rights')">
+      <div class="next-icon ni-g"><i class="ti ti-scale" style="font-size:15px;color:var(--lime);" aria-hidden="true"></i></div>
+      <div class="next-text"><div class="nt">Your rights under RRA 2025</div><div class="ns">Rights that apply directly to your contract</div></div>
+      <div class="next-arr">›</div>
+    </div>
+    <div class="next-card" onclick="generateLetter()">
+      <div class="next-icon ni-b"><i class="ti ti-file-description" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div>
+      <div class="next-text"><div class="nt">Generate a formal letter</div><div class="ns">Challenge illegal clauses in writing</div></div>
+      <div class="next-arr">›</div>
+    </div>
+    <div class="next-card" onclick="goToTool('emergency')">
+      <div class="next-icon ni-r"><i class="ti ti-alert-triangle" style="font-size:15px;color:var(--text-d);" aria-hidden="true"></i></div>
+      <div class="next-text"><div class="nt">I need emergency help now</div><div class="ns">Action Fraud, Citizens Advice, Shelter</div></div>
+      <div class="next-arr">›</div>
+    </div>
+  </div>
+  <div id="nextSectionResult" style="margin-top:0.75rem;"></div>
+  <div class="family-card fade-up-2" style="margin-top:1.25rem;">
+    <div class="fc-title">Want to share this with your family?</div>
+    <div class="fc-sub">Your family can see exactly what NestSafe AI found — in their own language. One tap.</div>
+    <div class="lang-section" style="margin-bottom:0.75rem;">
+      <div class="lang-label">Family language:</div>
+      <div class="lang-row">
+        <div class="lang-pill active" onclick="setFamilyLang(this,'en')">🇬🇧 English</div>
+        <div class="lang-pill" onclick="setFamilyLang(this,'fr')">🇫🇷 French</div>
+        <div class="lang-pill" onclick="setFamilyLang(this,'es')">🇪🇸 Spanish</div>
+        <div class="lang-pill" onclick="setFamilyLang(this,'zh')">🇨🇳 Chinese</div>
+        <div class="lang-pill" onclick="setFamilyLang(this,'hi')">🇮🇳 Hindi</div>
+      </div>
+    </div>
+    <button class="wa-btn" onclick="shareWithFamily()">
+      <i class="ti ti-brand-whatsapp" style="font-size:16px;" aria-hidden="true"></i>
+      Share with my family
+    </button>
+    <div id="familyResult" style="margin-top:0.75rem;"></div>
+  </div>
+  <div class="skip-link" onclick="goToScreen('mood')">No thanks, I am done for now</div>
+</div>
+
+<!-- SCREEN 7: EMERGENCY -->
+<div id="screen-emergency" class="screen">
+  <div class="back-link" onclick="goBack('situation')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
+  <div class="tool-title">Emergency housing help</div>
+  <div class="tool-sub">If you are in a housing crisis right now contact one of these organisations immediately.</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;">
+    <div class="next-card" style="background:rgba(220,38,38,0.06);border-color:rgba(220,38,38,0.18);">
+      <div class="next-icon ni-r"><i class="ti ti-phone" style="font-size:15px;color:var(--text-d);" aria-hidden="true"></i></div>
+      <div class="next-text"><div class="nt" style="color:var(--text-d);">Action Fraud</div><div class="ns">Report rental scams — 0300 123 2040</div></div>
+    </div>
+    <div class="next-card"><div class="next-icon ni-b"><i class="ti ti-phone" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Citizens Advice</div><div class="ns">Free legal advice — 0800 144 8848</div></div></div>
+    <div class="next-card"><div class="next-icon ni-g"><i class="ti ti-phone" style="font-size:15px;color:var(--lime);" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Shelter</div><div class="ns">Housing charity — 0808 800 4444</div></div></div>
+    <div class="next-card"><div class="next-icon ni-g"><i class="ti ti-heart" style="font-size:15px;color:var(--lime);" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Student Minds</div><div class="ns">Mental health support — studentminds.org.uk</div></div></div>
+    <div class="next-card"><div class="next-icon ni-b"><i class="ti ti-building" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Your university welfare team</div><div class="ns">Check your university website</div></div></div>
+  </div>
+  <div class="tool-title" style="font-size:1rem;margin-top:1rem;">Generate an emergency letter</div>
+  <div class="tool-sub">Describe your situation and we will draft a formal letter you can send to your landlord, university or local council.</div>
+  <textarea id="emergencyText" placeholder="Describe your emergency housing situation..."></textarea>
+  <button class="btn-primary" onclick="generateEmergencyLetter()" id="emergBtn">Generate my emergency letter</button>
+  <div id="emergencyResult" style="margin-top:1rem;"></div>
+</div>
+
+<!-- CHAT -->
+<div id="chatToggle" onclick="toggleChat()">
+  <i class="ti ti-message-circle" id="chatIcon" style="font-size:22px;color:var(--white);" aria-hidden="true"></i>
+</div>
+<div id="chatWindow">
+  <div class="chat-head">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="chat-avatar"><i class="ti ti-shield-check" style="font-size:14px;color:var(--white);" aria-hidden="true"></i></div>
+      <div class="chat-info"><div class="cn">NestSafe AI</div><div class="cs">Online — replies in seconds</div></div>
+    </div>
+    <div class="chat-close" onclick="toggleChat()"><i class="ti ti-x" aria-hidden="true"></i></div>
+  </div>
+  <div id="chatMsgs" class="chat-msgs">
+    <div class="msg-ai">
+      <div class="msg-avatar"><i class="ti ti-shield-check" style="font-size:11px;color:var(--white);" aria-hidden="true"></i></div>
+      <div class="msg-bubble-ai">Hi! Ask me anything about your tenancy, your rights, or any housing concern. I reply in any language.</div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="Ask any housing question..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <div class="chat-send" onclick="sendChat()"><i class="ti ti-send" style="font-size:14px;color:var(--white);" aria-hidden="true"></i></div>
+  </div>
+</div>
+
+<script>
+// API key lives server-side only, in the Netlify Function + environment variable (see netlify/functions/claude-proxy.js).
+const LANGS = {en:'English',fr:'French',es:'Spanish',zh:'Chinese (Simplified)',hi:'Hindi'};
+let rightsLang = 'en';
+let familyLang = 'en';
+let currentUser = null;
+let dropOpen = false;
+let chatOpen = false;
+let chatHistory = [];
+let lastContractResult = '';
+let lastScamResult = '';
+let lastContractScreen = 'contract';
+
+const SAMPLE_CONTRACT = `The tenant shall be responsible for all internal repairs costing under £200 including boiler servicing and maintenance. The landlord reserves the right to enter the property with 12 hours written notice at any reasonable time. A non-refundable administration fee of £250 is payable upon signing. The tenant agrees to pay a professional cleaning fee of £300 upon vacating the property regardless of its condition. The deposit of £1,800 may be withheld in full at the landlord's sole discretion if any damage is found. The tenant waives the right to challenge any rent increase proposed by the landlord.`;
+const SAMPLE_SCAM = `I found a 2 bedroom flat in Shoreditch on Facebook Marketplace for £750 per month. The landlord said they are currently working abroad and cannot meet in person. They sent photos and a contract by email. I need to pay two months deposit of £1,500 by bank transfer today and they will post the keys to me. They said three other students are interested and I need to decide by tonight.`;
+
+// NAVIGATION
+function goToScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goBack(to) { goToScreen(to); }
+
+function chooseMood(mood) {
+  const msgs = {
+    stressed:{cls:'ms-stressed',title:'You are not alone.',body:'Housing stress is one of the biggest causes of student dropout in the UK. Please reach out to your university welfare team today. You have more rights and more support than you may realise. We will help you find them.'},
+    worried:{cls:'ms-worried',title:'It is okay to feel worried.',body:'Many students feel uncertain about their housing situation. The best thing you can do right now is use NestSafe AI to check your contract or listing. You do not have to figure this out alone.'},
+    fine:{cls:'ms-fine',title:'Great to hear.',body:'Even if you are feeling fine right now it is still worth scanning your tenancy contract. Being prepared means you are protected if anything changes.'}
+  };
+  const m = msgs[mood];
+  document.getElementById('moodSupport').style.display = 'block';
+  document.getElementById('moodSupport').innerHTML = `<div class="mood-support ${m.cls}"><div class="ms-title">${m.title}</div>${m.body}</div>`;
+  setTimeout(() => goToScreen('situation'), 1800);
+}
+
+function goToTool(tool) {
+  if(tool === 'emergency') { goToScreen('emergency'); return; }
+  if(tool === 'contract') { lastContractScreen = 'contract'; goToScreen('contract'); return; }
+  if(tool === 'scam') { goToScreen('scam'); return; }
+  if(tool === 'rights') { goToScreen('rights'); return; }
+}
+
+function loadSampleContract() { document.getElementById('contractText').value = SAMPLE_CONTRACT; }
+function loadSampleScam() { document.getElementById('scamText').value = SAMPLE_SCAM; }
+function setRightsLang(btn,lang) { document.querySelectorAll('#screen-rights .lang-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); rightsLang=lang; }
+function setFamilyLang(btn,lang) { document.querySelectorAll('.family-card .lang-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); familyLang=lang; }
+function quickRight(q) { document.getElementById('rightsQ').value = q; askRights(); }
+
+// API
+async function callClaude(system, user, maxTokens=1000) {
+  const r = await fetch('/.netlify/functions/claude-proxy', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({system,messages:[{role:'user',content:user}],maxTokens})
+  });
+  if(!r.ok) throw new Error('API error '+r.status);
+  const d = await r.json();
+  return d.content.map(b=>b.text||'').join('');
+}
+
+function showLoading(id, msg) {
+  document.getElementById(id).innerHTML = `<div class="loading"><div class="spinner"></div><p>${msg}</p><small>This takes around 20 seconds</small></div>`;
+}
+function showError(id, msg) {
+  document.getElementById(id).innerHTML = `<div class="error-msg"><i class="ti ti-alert-triangle"></i> ${msg} Please try again.</div>`;
+}
+
+// CONTRACT SCAN
+async function scanContract() {
+  const text = document.getElementById('contractText').value.trim();
+  if(!text){showError('contractResult','Please paste your tenancy agreement text first.');return;}
+  const btn = document.getElementById('scanBtn');
+  btn.disabled=true;btn.textContent='Reading your contract...';
+  showLoading('contractResult','Reading your contract against UK law and the Renters Rights Act 2025...');
+  try {
+    const sys = 'You are a UK tenancy law expert specialising in the Renters Rights Act 2025 which came into force 1 May 2026. Explain everything in plain English a first-time renter would understand. Never use legal jargon.';
+    const prompt = `Analyse this tenancy agreement. For each issue use EXACTLY this format on a new line:
+RED: [clause name] — [plain English explanation under 25 words of why this is illegal or very unfair]
+AMBER: [clause name] — [plain English explanation under 25 words of the risk]
+GREEN: [clause name] — [plain English confirmation under 20 words that this is fair]
+
+Then write:
+## Summary
+One sentence plain English summary.
+
+## Three questions to ask your landlord before signing
+- [specific question 1]
+- [specific question 2]
+- [specific question 3]
+
+## Your rights under the Renters Rights Act 2025 that apply here
+- [right 1]
+- [right 2]
+
+Tenancy text:
+${text}`;
+    const result = await callClaude(sys, prompt);
+    lastContractResult = result;
+    document.getElementById('contractResult').innerHTML = renderContractResult(result);
+  } catch(e) { showError('contractResult','Something went wrong.'); }
+  finally { btn.disabled=false; btn.textContent='Check if this contract is safe to sign'; }
+}
+
+function renderContractResult(raw) {
+  const lines = raw.split('\n').filter(l=>l.trim());
+  const clauses = {red:[],amber:[],green:[]};
+  const others = [];
+  lines.forEach(line => {
+    const rm = line.match(/^RED[:\s-]+(.+)/i);
+    const am = line.match(/^AMBER[:\s-]+(.+)/i);
+    const gm = line.match(/^GREEN[:\s-]+(.+)/i);
+    const sm = line.match(/^#{1,3}\s+(.+)/);
+    const bm = line.match(/^[-•]\s+(.+)/);
+    if(rm) { const [name,...rest]=rm[1].split('—'); clauses.red.push({name:name?.trim(),exp:rest.join('—').trim()}); }
+    else if(am) { const [name,...rest]=am[1].split('—'); clauses.amber.push({name:name?.trim(),exp:rest.join('—').trim()}); }
+    else if(gm) { const [name,...rest]=gm[1].split('—'); clauses.green.push({name:name?.trim(),exp:rest.join('—').trim()}); }
+    else if(sm) others.push({type:'section',text:sm[1].trim()});
+    else if(bm) others.push({type:'bullet',text:bm[1].trim()});
+    else if(line.trim()) others.push({type:'para',text:line.trim()});
+  });
+  const score = Math.min(10, clauses.red.length*2.5 + clauses.amber.length*1);
+  const sClass = score>=6?'high':score>=3?'med':'low';
+  const sVerdict = score>=6?'High risk contract':score>=3?'Moderate risk':'Relatively safe';
+  let html = `<div class="progress-section"><div class="prog-label">Step 2 of 3 — Your results</div><div class="prog-bar"><span class="pb-done"></span><span class="pb-active"></span><span class="pb-todo"></span></div></div>`;
+  html += `<div class="result-intro"><div class="rt">We read your contract.</div><div class="rs">Here is what you need to know before you sign.</div></div>`;
+  html += `<div class="score-box"><div class="score-num sn-${sClass}">${Math.round(score)}</div><div class="score-lbl">out of 10 — overall risk score</div><div class="score-verdict sv-${sClass}">${sVerdict}</div></div>`;
+  const makeAcc = (type, badge, badgeClass, title, titleClass, bodyClass, items, dotClass) => {
+    if(items.length===0) return '';
+    const id = 'acc-'+type;
+    const itemsHtml = items.map(c=>`<div class="clause-item"><div class="clause-dot ${dotClass}"></div><div><div class="clause-text">${c.name||''}</div>${c.exp?`<div class="clause-exp">${c.exp}</div>`:''}</div></div>`).join('');
+    return `<div class="acc"><div class="acc-header acc-${type}" onclick="toggleAcc('${id}')"><div class="acc-left"><span class="acc-badge ${badgeClass}">${badge}</span><span class="acc-title ${titleClass}">${title}</span></div><div class="acc-right"><span class="acc-count">${items.length}</span><i class="ti ti-chevron-down acc-chevron" id="${id}-chev" aria-hidden="true"></i></div></div><div class="acc-body acc-body-${type} ${type==='r'?'show':''}" id="${id}-body">${itemsHtml}</div></div>`;
+  };
+  html += makeAcc('r','HIGH RISK','ab-r','Fix before signing','at-r','acc-body-r',clauses.red,'cd-r');
+  html += makeAcc('a','REVIEW','ab-a','Worth checking','at-a','acc-body-a',clauses.amber,'cd-a');
+  html += makeAcc('g','OK','ab-g','Looks fine','at-g','acc-body-g',clauses.green,'cd-g');
+  // Others (summary, questions, rights)
+  if(others.length>0) {
+    html += '<div class="card" style="margin-top:0.75rem;">';
+    let inBullets = false;
+    others.forEach(item => {
+      if(item.type==='section'){if(inBullets){html+='</div>';inBullets=false;}html+=`<div style="font-size:0.78rem;font-weight:600;color:var(--lime);text-transform:uppercase;letter-spacing:0.06em;margin:0.85rem 0 0.4rem;">${item.text}</div>`;}
+      else if(item.type==='bullet'){if(!inBullets){html+='<div>';inBullets=true;}html+=`<div class="clause-item"><div class="clause-dot cd-g"></div><div class="clause-text">${item.text}</div></div>`;}
+      else if(item.type==='para'){if(inBullets){html+='</div>';inBullets=false;}html+=`<p style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:0.4rem;">${item.text}</p>`;}
+    });
+    if(inBullets)html+='</div>';
+    html += '</div>';
+  }
+  // Translate strip
+  html += `<div class="lang-section"><div class="lang-label">Translate results to:</div><div class="lang-row"><div class="lang-pill active" onclick="translateResult(this,'en')">🇬🇧 English</div><div class="lang-pill" onclick="translateResult(this,'fr')">🇫🇷 French</div><div class="lang-pill" onclick="translateResult(this,'es')">🇪🇸 Spanish</div><div class="lang-pill" onclick="translateResult(this,'zh')">🇨🇳 Chinese</div><div class="lang-pill" onclick="translateResult(this,'hi')">🇮🇳 Hindi</div></div></div>`;
+  html += `<button class="btn-primary" onclick="goToScreen('nextsteps')" style="margin-top:0.5rem;">See what to do next →</button>`;
+  return html;
+}
+
+function toggleAcc(id) {
+  const body = document.getElementById(id+'-body');
+  const chev = document.getElementById(id+'-chev');
+  body.classList.toggle('show');
+  chev.classList.toggle('open');
+}
+
+async function translateResult(btn, lang) {
+  if(!lastContractResult) return;
+  document.querySelectorAll('#contractResult .lang-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(lang==='en'){document.getElementById('contractResult').innerHTML=renderContractResult(lastContractResult);return;}
+  showLoading('contractResult',`Translating to ${LANGS[lang]}...`);
+  try {
+    const sys = `You are a translator. Translate the following tenancy analysis to ${LANGS[lang]}. Keep the RED:, AMBER:, GREEN:, ## and - formatting exactly the same. Only translate the words not the format.`;
+    const result = await callClaude(sys, lastContractResult);
+    lastContractResult = result;
+    document.getElementById('contractResult').innerHTML = renderContractResult(result);
+  } catch(e){showError('contractResult','');}
+}
+
+// SCAM CHECK
+async function checkScam() {
+  const text = document.getElementById('scamText').value.trim();
+  if(!text){showError('scamResult','Please describe the listing first.');return;}
+  const btn = document.getElementById('scamBtn');
+  btn.disabled=true;btn.textContent='Checking...';
+  showLoading('scamResult','Checking for known UK rental scam patterns...');
+  try {
+    const sys = 'You are a UK rental fraud expert. Over £1M is lost to student rental scams in the UK every year. Be direct, honest and always act in the student\'s best interest.';
+    const prompt = `Analyse this rental situation for scam indicators. Give verdict first as EXACTLY one of:
+RED: HIGH SCAM RISK — [one sentence why]
+AMBER: PROCEED WITH CAUTION — [one sentence why]
+GREEN: APPEARS LEGITIMATE — [one sentence why]
+
+Then write:
+## Scam indicators found
+- [each red flag or "No major indicators found"]
+
+## The financial risk
+[One sentence on how much the student could lose]
+
+## What to do right now
+- [action 1]
+- [action 2]
+- [action 3]
+
+Situation:
+${text}`;
+    const result = await callClaude(sys, prompt);
+    lastScamResult = result;
+    document.getElementById('scamResult').innerHTML = renderScamResult(result);
+  } catch(e){showError('scamResult','');}
+  finally{btn.disabled=false;btn.textContent='Check if this listing is real';}
+}
+
+function renderScamResult(raw) {
+  const lines = raw.split('\n');
+  let verdict = null;
+  let others = [];
+  lines.forEach(line => {
+    const rm = line.match(/^RED[:\s-]+(.+)/i);
+    const am = line.match(/^AMBER[:\s-]+(.+)/i);
+    const gm = line.match(/^GREEN[:\s-]+(.+)/i);
+    const sm = line.match(/^#{1,3}\s+(.+)/);
+    const bm = line.match(/^[-•]\s+(.+)/);
+    if(rm&&!verdict) verdict={level:'r',label:'HIGH SCAM RISK',text:rm[1].replace(/^HIGH SCAM RISK[:\s-]*/i,'').trim()};
+    else if(am&&!verdict) verdict={level:'a',label:'PROCEED WITH CAUTION',text:am[1].replace(/^PROCEED WITH CAUTION[:\s-]*/i,'').trim()};
+    else if(gm&&!verdict) verdict={level:'g',label:'APPEARS LEGITIMATE',text:gm[1].replace(/^APPEARS LEGITIMATE[:\s-]*/i,'').trim()};
+    else if(sm) others.push({type:'section',text:sm[1].trim()});
+    else if(bm) others.push({type:'bullet',text:bm[1].trim()});
+    else if(line.trim()) others.push({type:'para',text:line.trim()});
+  });
+  let html = `<div class="progress-section"><div class="prog-label">Step 2 of 3 — Your results</div><div class="prog-bar"><span class="pb-done"></span><span class="pb-active"></span><span class="pb-todo"></span></div></div>`;
+  html += `<div class="result-intro"><div class="rt">We checked your listing.</div><div class="rs">Here is what we found.</div></div>`;
+  if(verdict) {
+    const colors = {r:'rgba(220,38,38,0.08)',a:'rgba(245,158,11,0.07)',g:'rgba(16,185,129,0.07)'};
+    const borders = {r:'rgba(220,38,38,0.25)',a:'rgba(245,158,11,0.2)',g:'rgba(16,185,129,0.2)'};
+    const textColors = {r:'var(--text-d)',a:'var(--text-a)',g:'var(--text-g)'};
+    html += `<div style="background:${colors[verdict.level]};border:1px solid ${borders[verdict.level]};border-radius:12px;padding:1rem;margin-bottom:0.75rem;"><div style="font-size:0.7rem;font-weight:700;color:${textColors[verdict.level]};letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.3rem;">${verdict.label}</div><div style="font-size:0.9rem;font-weight:700;color:var(--white);">${verdict.text}</div></div>`;
+  }
+  if(others.length>0) {
+    html += '<div class="card">';
+    let inB = false;
+    others.forEach(item => {
+      if(item.type==='section'){if(inB){html+='</div>';inB=false;}html+=`<div style="font-size:0.78rem;font-weight:600;color:var(--lime);text-transform:uppercase;letter-spacing:0.06em;margin:0.75rem 0 0.4rem;">${item.text}</div>`;}
+      else if(item.type==='bullet'){if(!inB){html+='<div>';inB=true;}html+=`<div class="clause-item"><div class="clause-dot cd-g"></div><div class="clause-text">${item.text}</div></div>`;}
+      else{if(inB){html+='</div>';inB=false;}html+=`<p style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:0.4rem;">${item.text}</p>`;}
+    });
+    if(inB)html+='</div>';
+    html += '</div>';
+  }
+  html += `<button class="btn-primary" onclick="goToScreen('nextsteps')" style="margin-top:0.5rem;">See what to do next →</button>`;
+  return html;
+}
+
+// RIGHTS
+async function askRights() {
+  const q = document.getElementById('rightsQ').value.trim();
+  if(!q) return;
+  const btn = document.getElementById('rightsBtn');
+  btn.disabled=true;btn.textContent='Getting your answer...';
+  showLoading('rightsResult',`Getting your answer in ${LANGS[rightsLang]}...`);
+  try {
+    const sys = `You are a UK tenancy law expert. Answer in ${LANGS[rightsLang]} in plain everyday language. Keep under 100 words. Reference the Renters Rights Act 2025 where relevant. Be direct and practical.`;
+    const result = await callClaude(sys, `UK tenant rights question: ${q}`);
+    document.getElementById('rightsResult').innerHTML = `<div class="card" style="background:rgba(0,255,135,0.04);border-color:rgba(0,255,135,0.15);"><div style="font-size:0.75rem;font-weight:600;color:var(--lime);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em;">Your answer in ${LANGS[rightsLang]}</div><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>`;
+  } catch(e){showError('rightsResult','');}
+  finally{btn.disabled=false;btn.textContent='Get my answer';}
+}
+
+// NEXT STEPS
+async function showNextSection(type) {
+  const el = document.getElementById('nextSectionResult');
+  showLoading('nextSectionResult', type==='questions'?'Generating your landlord questions...':'Loading your rights...');
+  try {
+    let result;
+    if(type==='questions') {
+      const sys = 'You are a UK tenancy law expert. Generate three specific questions a student should ask their landlord before signing. Be direct and practical. Format as a numbered list.';
+      result = await callClaude(sys, `Based on these contract concerns: ${lastContractResult.substring(0,500)}`);
+    } else {
+      const sys = 'You are a UK tenancy law expert. List two to three key rights under the Renters Rights Act 2025 that apply to a student in a typical tenancy. Plain English. Short.';
+      result = await callClaude(sys, 'What are my key rights as a student tenant under the Renters Rights Act 2025?');
+    }
+    el.innerHTML = `<div class="card"><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>`;
+  } catch(e){showError('nextSectionResult','');}
+}
+
+async function generateLetter() {
+  showLoading('nextSectionResult','Generating your formal letter...');
+  try {
+    const sys = 'You are a UK housing solicitor. Write a formal but firm letter from a tenant to a landlord challenging illegal clauses. Reference UK law. Under 200 words.';
+    const result = await callClaude(sys, `Write a formal letter challenging these contract issues: ${lastContractResult.substring(0,400)}`);
+    document.getElementById('nextSectionResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>`;
+  } catch(e){showError('nextSectionResult','');}
+}
+
+async function shareWithFamily() {
+  showLoading('familyResult',`Creating family summary in ${LANGS[familyLang]}...`);
+  try {
+    const sys = `You are NestSafe AI. Write a short reassuring WhatsApp message in ${LANGS[familyLang]} to a student's family. Under 80 words. Warm and reassuring.`;
+    const result = await callClaude(sys, `Write a WhatsApp message to a student's family confirming their child's UK accommodation has been checked by NestSafe AI. Mention the contract was scanned, deposit rights are understood, and the student knows their rights under the Renters Rights Act 2025. Write in ${LANGS[familyLang]}.`);
+    const encoded = encodeURIComponent(result);
+    document.getElementById('familyResult').innerHTML = `<div style="background:rgba(0,255,135,0.05);border:1px solid rgba(0,255,135,0.12);border-radius:10px;padding:0.85rem;font-size:0.82rem;color:var(--white);line-height:1.7;margin-bottom:0.75rem;">${result.replace(/\n/g,'<br>')}</div><a href="https://wa.me/?text=${encoded}" target="_blank"><button class="wa-btn"><i class="ti ti-brand-whatsapp" style="font-size:16px;" aria-hidden="true"></i> Open in WhatsApp</button></a>`;
+  } catch(e){showError('familyResult','');}
+}
+
+async function generateEmergencyLetter() {
+  const text = document.getElementById('emergencyText').value.trim();
+  if(!text){showError('emergencyResult','Please describe your situation first.');return;}
+  const btn = document.getElementById('emergBtn');
+  btn.disabled=true;btn.textContent='Generating...';
+  showLoading('emergencyResult','Generating your emergency letter...');
+  try {
+    const sys = 'You are a UK housing solicitor. Write a formal emergency letter for a student in a housing crisis. Reference relevant UK law. Under 250 words.';
+    const result = await callClaude(sys, `Emergency housing letter for: ${text}`);
+    document.getElementById('emergencyResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>`;
+  } catch(e){showError('emergencyResult','');}
+  finally{btn.disabled=false;btn.textContent='Generate my emergency letter';}
+}
+
+// LOGIN
+function toggleDropdown() {
+  dropOpen = !dropOpen;
+  document.getElementById('loginDropdown').style.display = dropOpen?'block':'none';
+  document.getElementById('loginChevron').style.transform = dropOpen?'rotate(180deg)':'rotate(0)';
+}
+function closeDropdown(){ dropOpen=false; document.getElementById('loginDropdown').style.display='none'; document.getElementById('loginChevron').style.transform='rotate(0)'; }
+document.addEventListener('click', e => { if(!document.getElementById('loginBtn').contains(e.target)&&!document.getElementById('loginDropdown').contains(e.target)) closeDropdown(); });
+
+function signIn(role, label, icon) {
+  const name = prompt('Enter your name to continue:');
+  if(!name){closeDropdown();return;}
+  currentUser = {name:name.trim(),role,label};
+  const initial = name.trim()[0].toUpperCase();
+  document.getElementById('loginBtn').innerHTML = `<div style="width:22px;height:22px;background:rgba(0,255,135,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--lime);">${initial}</div><div style="line-height:1.2;"><div style="font-size:11px;font-weight:600;color:var(--white);">${name.trim().split(' ')[0]}</div><div style="font-size:9px;color:var(--lime);">${label}</div></div><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:rgba(255,255,255,0.4);" aria-hidden="true"></i>`;
+  document.getElementById('siName').textContent = name.trim();
+  document.getElementById('siRole').textContent = 'Signed in as '+label;
+  document.getElementById('signedOutMenu').style.display = 'none';
+  document.getElementById('signedInMenu').style.display = 'block';
+  closeDropdown();
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;max-width:90vw;text-align:center;';
+  toast.textContent = `Welcome ${name.trim().split(' ')[0]}! Signed in as ${label}.`;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),3000);
+}
+function signOut() { currentUser=null; closeDropdown(); document.getElementById('loginBtn').innerHTML='<i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i><span id="loginLabel">Sign in</span><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:var(--muted);" aria-hidden="true"></i>'; document.getElementById('signedOutMenu').style.display='block'; document.getElementById('signedInMenu').style.display='none'; }
+function switchRole() { signOut(); setTimeout(()=>toggleDropdown(),100); }
+
+// CHAT
+let chatIsOpen = false;
+function toggleChat() {
+  chatIsOpen = !chatIsOpen;
+  document.getElementById('chatWindow').style.display = chatIsOpen?'block':'none';
+  document.getElementById('chatIcon').className = chatIsOpen?'ti ti-x':'ti ti-message-circle';
+  if(chatIsOpen) setTimeout(()=>document.getElementById('chatInput').focus(),100);
+}
+function addChatMsg(text, isUser) {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = isUser?'msg-user':'msg-ai';
+  if(!isUser) div.innerHTML = `<div class="msg-avatar"><i class="ti ti-shield-check" style="font-size:11px;color:var(--white);" aria-hidden="true"></i></div><div class="msg-bubble-ai">${text}</div>`;
+  else div.innerHTML = `<div class="msg-bubble-user">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  addChatMsg(text, true);
+  chatHistory.push({role:'user',content:text});
+  const typing = document.createElement('div');
+  typing.className='msg-ai';typing.id='typing';
+  typing.innerHTML='<div class="msg-avatar"><i class="ti ti-shield-check" style="font-size:11px;color:var(--white);" aria-hidden="true"></i></div><div class="msg-bubble-ai" style="color:var(--muted);">Thinking...</div>';
+  document.getElementById('chatMsgs').appendChild(typing);
+  document.getElementById('chatMsgs').scrollTop = 999999;
+  try {
+    const sys = 'You are NestSafe AI, a friendly UK housing rights assistant. Plain English. Under 80 words. Warm, direct, practical. Reference the Renters Rights Act 2025 where relevant. Reply in the same language the user writes in.';
+    const r = await fetch('/.netlify/functions/claude-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:chatHistory,maxTokens:300})});
+    const d = await r.json();
+    const reply = d.content.map(b=>b.text||'').join('');
+    document.getElementById('typing')?.remove();
+    chatHistory.push({role:'assistant',content:reply});
+    addChatMsg(reply, false);
+  } catch(e){ document.getElementById('typing')?.remove(); addChatMsg('Sorry, I could not connect. Please try again.', false); }
+}
+</script>
+</body>
+</html>
