@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NestSafe AI — Student Accommodation Protection</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='140' fill='%2300FF87'/%3E%3Cpath d='M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z' fill='%230D1117'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NestSafe AI — Student Accommodation Protection">
+<meta property="og:description" content="Free AI contract and scam checks for UK students. Paid for by your university, not by you.">
+<meta property="og:image" content="https://vocal-smakager-ed9754.netlify.app/nestsafe_logo_512.png">
+<meta property="og:url" content="https://vocal-smakager-ed9754.netlify.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NestSafe AI — Student Accommodation Protection">
+<meta name="twitter:description" content="Free AI contract and scam checks for UK students. Paid for by your university, not by you.">
+<meta name="twitter:image" content="https://vocal-smakager-ed9754.netlify.app/nestsafe_logo_512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -163,6 +173,13 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .cd-g{background:var(--lgreen);}
 .clause-text{font-size:0.82rem;color:rgba(255,255,255,0.85);line-height:1.4;font-weight:500;}
 .clause-exp{font-size:0.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.section-head{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.62rem 0.85rem;margin:0.75rem 0 0.5rem;font-size:0.82rem;font-weight:700;color:var(--white);}
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.5rem;}
+.section-para{font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0;}
+.section-list{display:flex;flex-direction:column;gap:8px;}
+.q-item{display:flex;gap:10px;}
+.q-num{width:18px;height:18px;border-radius:50%;background:rgba(252,211,77,0.15);color:var(--text-a);font-size:0.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.q-text{font-size:0.82rem;color:rgba(255,255,255,0.85);line-height:1.5;}
 
 /* TRANSLATE */
 .lang-section{margin:1rem 0;}
@@ -626,7 +643,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
 </div>
 
 <!-- CHAT -->
-<div id="chatToggle" onclick="toggleChat()">
+<div id="chatToggle" onclick="toggleChat()" role="button" tabindex="0" aria-label="Open chat with NestSafe AI" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChat();}">
   <i class="ti ti-message-circle" id="chatIcon" style="font-size:22px;color:var(--white);" aria-hidden="true"></i>
 </div>
 <div id="chatWindow">
@@ -635,7 +652,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
       <div class="chat-avatar"><i class="ti ti-shield-check" style="font-size:14px;color:var(--white);" aria-hidden="true"></i></div>
       <div class="chat-info"><div class="cn">NestSafe AI</div><div class="cs">Online — replies in seconds</div></div>
     </div>
-    <div class="chat-close" onclick="toggleChat()"><i class="ti ti-x" aria-hidden="true"></i></div>
+    <div class="chat-close" onclick="toggleChat()" role="button" tabindex="0" aria-label="Close chat" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChat();}"><i class="ti ti-x" aria-hidden="true"></i></div>
   </div>
   <div id="chatMsgs" class="chat-msgs">
     <div class="msg-ai">
@@ -830,7 +847,8 @@ function showLoading(id, msg) {
   document.getElementById(id).innerHTML = `<div class="loading"><div class="spinner"></div><p>${msg}</p><small>This takes around 20 seconds</small></div>`;
 }
 function showError(id, msg) {
-  document.getElementById(id).innerHTML = `<div class="error-msg"><i class="ti ti-alert-triangle"></i> ${msg} Please try again.</div>`;
+  const text = msg && msg.trim() ? msg : 'We could not reach NestSafe AI.';
+  document.getElementById(id).innerHTML = `<div class="error-msg"><i class="ti ti-alert-triangle"></i> ${text} Check your connection and try again.</div>`;
 }
 
 // CONTRACT SCAN
@@ -921,17 +939,39 @@ function renderContractResult(raw) {
   html += makeAcc('r','HIGH RISK','ab-r','Fix before signing','at-r','acc-body-r',clauses.red,'cd-r');
   html += makeAcc('a','REVIEW','ab-a','Worth checking','at-a','acc-body-a',clauses.amber,'cd-a');
   html += makeAcc('g','OK','ab-g','Looks fine','at-g','acc-body-g',clauses.green,'cd-g');
-  // Others (summary, questions, rights)
+  // Others (summary, questions, rights) — each section gets its own header pill and
+  // card, matching the accordion visual language above instead of one plain text block.
   if(others.length>0) {
-    html += '<div class="card" style="margin-top:0.75rem;">';
-    let inBullets = false;
+    let sectionOpen = false;
+    let bulletsOpen = false;
+    let isQuestionSection = false;
+    let qCounter = 0;
     others.forEach(item => {
-      if(item.type==='section'){if(inBullets){html+='</div>';inBullets=false;}html+=`<div style="font-size:0.78rem;font-weight:600;color:var(--lime);text-transform:uppercase;letter-spacing:0.06em;margin:0.85rem 0 0.4rem;">${item.text}</div>`;}
-      else if(item.type==='bullet'){if(!inBullets){html+='<div>';inBullets=true;}html+=`<div class="clause-item"><div class="clause-dot cd-g"></div><div class="clause-text">${item.text}</div></div>`;}
-      else if(item.type==='para'){if(inBullets){html+='</div>';inBullets=false;}html+=`<p style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:0.4rem;">${item.text}</p>`;}
+      if(item.type==='section'){
+        if(bulletsOpen){html+='</div>';bulletsOpen=false;}
+        if(sectionOpen){html+='</div>';sectionOpen=false;}
+        const lower = item.text.toLowerCase();
+        isQuestionSection = lower.includes('question');
+        const isRights = lower.includes('right');
+        const icon = isQuestionSection?'ti-message-2':isRights?'ti-scale':'ti-file-text';
+        const iconColor = isQuestionSection?'var(--text-a)':'var(--lime)';
+        qCounter = 0;
+        html += `<div class="section-head"><i class="ti ${icon}" style="color:${iconColor};" aria-hidden="true"></i><span>${item.text}</span></div>`;
+        html += '<div class="section-card">';
+        sectionOpen = true;
+      }
+      else if(item.type==='bullet'){
+        if(!bulletsOpen){html+='<div class="section-list">';bulletsOpen=true;}
+        if(isQuestionSection){qCounter++;html+=`<div class="q-item"><div class="q-num">${qCounter}</div><div class="q-text">${item.text}</div></div>`;}
+        else{html+=`<div class="clause-item"><div class="clause-dot cd-g"></div><div class="clause-text">${item.text}</div></div>`;}
+      }
+      else if(item.type==='para'){
+        if(bulletsOpen){html+='</div>';bulletsOpen=false;}
+        html+=`<p class="section-para">${item.text}</p>`;
+      }
     });
-    if(inBullets)html+='</div>';
-    html += '</div>';
+    if(bulletsOpen)html+='</div>';
+    if(sectionOpen)html+='</div>';
   }
   // Translate strip
   html += `<div class="lang-section"><div class="lang-label">Translate results to:</div><div class="lang-row"><div class="lang-pill active" onclick="translateResult(this,'en')">🇬🇧 English</div><div class="lang-pill" onclick="translateResult(this,'fr')">🇫🇷 French</div><div class="lang-pill" onclick="translateResult(this,'es')">🇪🇸 Spanish</div><div class="lang-pill" onclick="translateResult(this,'zh')">🇨🇳 Chinese</div><div class="lang-pill" onclick="translateResult(this,'hi')">🇮🇳 Hindi</div></div></div>`;
@@ -957,7 +997,7 @@ async function translateResult(btn, lang) {
     const result = await callClaude(sys, lastContractResult);
     lastContractResult = result;
     document.getElementById('contractResult').innerHTML = renderContractResult(result);
-  } catch(e){showError('contractResult','');}
+  } catch(e){showError('contractResult','Could not translate this result.');}
 }
 
 // SCAM CHECK
@@ -1002,7 +1042,7 @@ ${situationText}`;
     const result = await callClaude(sys, prompt, 1000, canned);
     lastScamResult = result;
     document.getElementById('scamResult').innerHTML = renderScamResult(result) + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
-  } catch(e){showError('scamResult','');}
+  } catch(e){showError('scamResult','Could not check this listing.');}
   finally{btn.disabled=false;btn.textContent='Check if this listing is real';}
 }
 
@@ -1057,7 +1097,7 @@ async function askRights() {
     const sys = `You are a UK tenancy law expert. Answer in ${LANGS[rightsLang]} in plain everyday language. Keep under 100 words. Reference the Renters Rights Act 2025 where relevant. Be direct and practical.`;
     const result = await callClaude(sys, `UK tenant rights question: ${q}`);
     document.getElementById('rightsResult').innerHTML = `<div class="card" style="background:rgba(0,255,135,0.04);border-color:rgba(0,255,135,0.15);"><div style="font-size:0.75rem;font-weight:600;color:var(--lime);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em;">Your answer in ${LANGS[rightsLang]}</div><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>`;
-  } catch(e){showError('rightsResult','');}
+  } catch(e){showError('rightsResult','Could not get your answer.');}
   finally{btn.disabled=false;btn.textContent='Get my answer';}
 }
 
@@ -1075,7 +1115,7 @@ async function showNextSection(type) {
       result = await callClaude(sys, 'What are my key rights as a student tenant under the Renters Rights Act 2025?');
     }
     el.innerHTML = `<div class="card"><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>`;
-  } catch(e){showError('nextSectionResult','');}
+  } catch(e){showError('nextSectionResult','Could not load this section.');}
 }
 
 async function generateLetter() {
@@ -1084,7 +1124,7 @@ async function generateLetter() {
     const sys = 'You are a UK housing solicitor. Write a formal but firm letter from a tenant to a landlord challenging illegal clauses. Reference UK law. Under 200 words.';
     const result = await callClaude(sys, `Write a formal letter challenging these contract issues: ${lastContractResult.substring(0,400)}`);
     document.getElementById('nextSectionResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>`;
-  } catch(e){showError('nextSectionResult','');}
+  } catch(e){showError('nextSectionResult','Could not load this section.');}
 }
 
 async function shareWithFamily() {
@@ -1094,7 +1134,7 @@ async function shareWithFamily() {
     const result = await callClaude(sys, `Write a WhatsApp message to a student's family confirming their child's UK accommodation has been checked by NestSafe AI. Mention the contract was scanned, deposit rights are understood, and the student knows their rights under the Renters Rights Act 2025. Write in ${LANGS[familyLang]}.`);
     const encoded = encodeURIComponent(result);
     document.getElementById('familyResult').innerHTML = `<div style="background:rgba(0,255,135,0.05);border:1px solid rgba(0,255,135,0.12);border-radius:10px;padding:0.85rem;font-size:0.82rem;color:var(--white);line-height:1.7;margin-bottom:0.75rem;">${result.replace(/\n/g,'<br>')}</div><a href="https://wa.me/?text=${encoded}" target="_blank"><button class="wa-btn"><i class="ti ti-brand-whatsapp" style="font-size:16px;" aria-hidden="true"></i> Open in WhatsApp</button></a>`;
-  } catch(e){showError('familyResult','');}
+  } catch(e){showError('familyResult','Could not create the family summary.');}
 }
 
 async function generateEmergencyLetter() {
@@ -1107,7 +1147,7 @@ async function generateEmergencyLetter() {
     const sys = 'You are a UK housing solicitor. Write a formal emergency letter for a student in a housing crisis. Reference relevant UK law. Under 250 words.';
     const result = await callClaude(sys, `Emergency housing letter for: ${text}`);
     document.getElementById('emergencyResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>`;
-  } catch(e){showError('emergencyResult','');}
+  } catch(e){showError('emergencyResult','Could not generate your letter.');}
   finally{btn.disabled=false;btn.textContent='Generate my emergency letter';}
 }
 
