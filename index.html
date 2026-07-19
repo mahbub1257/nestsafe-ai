@@ -240,6 +240,44 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .glance-headline{font-family:'Syne',sans-serif;font-weight:800;line-height:1.3;letter-spacing:-0.3px;color:var(--white);text-align:center;padding:1.5rem 0.75rem 0;margin-bottom:14px;}
 .glance-headline div{font-size:clamp(0.85rem,4vw,1.15rem);white-space:nowrap;}
 .glance-headline em{color:var(--lime);font-style:normal;}
+
+/* LANDING PAGE — EXTRA SECTIONS (ported from full-journey prototype, restyled to match) */
+.fold-marker{display:flex;align-items:center;gap:10px;margin:1.75rem 0 0.25rem;opacity:0.5;}
+.fold-marker .line{flex:1;height:1px;background:var(--border);}
+.fold-marker .txt{font-size:0.68rem;color:var(--muted);letter-spacing:0.06em;white-space:nowrap;text-transform:uppercase;}
+.landing-section{padding:1.5rem 0 0.25rem;}
+.section-lbl{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);margin-bottom:0.5rem;font-weight:700;}
+.landing-section h3{font-family:'Syne',sans-serif;font-size:1.05rem;color:var(--white);font-weight:700;margin-bottom:0.9rem;line-height:1.3;}
+.steps{display:flex;flex-direction:column;gap:0.85rem;margin-bottom:0.5rem;}
+.step{display:flex;gap:0.75rem;align-items:flex-start;}
+.step .num{width:24px;height:24px;border-radius:50%;background:var(--lime);color:#0D0D0D;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step .t{font-size:0.85rem;font-weight:600;color:var(--white);}
+.step .d{font-size:0.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0.25rem;}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.9rem;}
+.feature-card i{font-size:17px;color:var(--lime);margin-bottom:0.5rem;display:block;}
+.feature-card .t{font-size:0.82rem;font-weight:700;color:var(--white);margin-bottom:2px;}
+.feature-card .d{font-size:0.72rem;color:var(--muted);line-height:1.4;}
+.example-card{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.18);border-radius:12px;padding:1.1rem;}
+.example-card .ex-kicker{font-size:0.7rem;font-weight:700;color:var(--text-a);letter-spacing:0.04em;margin-bottom:0.5rem;display:flex;align-items:center;gap:6px;}
+.example-card .ex-t{font-family:'Syne',sans-serif;font-size:0.95rem;color:var(--white);font-weight:600;line-height:1.45;margin-bottom:0.5rem;}
+.example-card .ex-d{font-size:0.76rem;color:var(--muted);line-height:1.55;}
+.diff-card{background:var(--card);border:1px solid rgba(0,255,135,0.2);border-radius:12px;padding:1.1rem;}
+.diff-card .k{font-size:0.68rem;font-weight:700;color:var(--lime);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:0.5rem;}
+.diff-card .t{font-family:'Syne',sans-serif;font-size:0.95rem;color:var(--white);font-weight:700;line-height:1.4;margin-bottom:0.5rem;}
+.diff-card .d{font-size:0.76rem;color:var(--muted);line-height:1.55;}
+.landing-footer{padding:1.75rem 0 0.5rem;text-align:center;border-top:1px solid var(--border);margin-top:1.5rem;}
+.landing-footer .flinks{font-size:0.7rem;color:var(--muted);display:flex;justify-content:center;gap:12px;margin-bottom:8px;}
+.landing-footer .flinks span{cursor:pointer;}
+.landing-footer .flinks span:hover{color:var(--lime);}
+.landing-footer .copy{font-size:0.66rem;color:#374151;}
+
+.stat-ticker{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;margin:0 auto 1rem;max-width:420px;}
+.stat-ticker-dot{width:6px;height:6px;border-radius:50%;background:var(--lime);flex-shrink:0;animation:pulseDot 2s infinite;}
+.stat-ticker-text{font-size:0.72rem;color:var(--muted);line-height:1.5;transition:opacity 0.4s;}
+.stat-ticker-text b{color:var(--white);font-weight:700;}
+.stat-ticker-text .src{color:#374151;font-size:0.65rem;display:block;margin-top:2px;}
+@media (prefers-reduced-motion: reduce){.stat-ticker-dot{animation:none;}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
@@ -302,13 +340,13 @@ textarea::placeholder,input::placeholder{color:#374151;}
     <div>Don't sign until <em>NestSafe&nbsp;AI</em></div>
     <div>reads it first.</div>
   </div>
-  <div class="live-strip fade-up">
-    <span class="live-dot" aria-hidden="true"></span>
-    <span>2,847 contracts scanned this week</span>
-  </div>
   <div class="trust-strip fade-up">
     <i class="ti ti-shield-check" aria-hidden="true"></i>
     <span>Free for every student &middot; Paid for by your university</span>
+  </div>
+  <div class="stat-ticker fade-up" id="statTicker">
+    <div class="stat-ticker-dot" aria-hidden="true"></div>
+    <div class="stat-ticker-text" id="statTickerText"></div>
   </div>
   <div class="mood-hero fade-up">
     <div class="mood-icon"><i class="ti ti-home" aria-hidden="true"></i></div>
@@ -330,8 +368,53 @@ textarea::placeholder,input::placeholder{color:#374151;}
     </div>
   </div>
   <div id="moodSupport" style="display:none;"></div>
-  <div class="mood-tip fade-up-2">78% of students who got housing support stayed in education. You are in the right place.</div>
+  <div class="mood-tip fade-up-2">78% of students say support services helped them stay at university (BACP). Getting support early is worth it.</div>
   <div class="privacy-note fade-up-3">Your answer is completely private</div>
+
+  <div class="fold-marker"><div class="line"></div><div class="txt">Still deciding? Here is what happens next</div><div class="line"></div></div>
+
+  <div class="landing-section">
+    <div class="section-lbl">How it works</div>
+    <h3>Three steps, plain English the whole way</h3>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div><div class="t">Paste your tenancy agreement, or upload the PDF</div><div class="d">No sign-up needed to try it.</div></div></div>
+      <div class="step"><div class="num">2</div><div><div class="t">Get a plain-English risk breakdown</div><div class="d">Every flag points to the exact clause and the law behind it.</div></div></div>
+      <div class="step"><div class="num">3</div><div><div class="t">Share it with family if you want to</div><div class="d">Translated automatically, one tap.</div></div></div>
+    </div>
+  </div>
+
+  <div class="landing-section">
+    <div class="section-lbl">What's included</div>
+    <div class="feature-grid">
+      <div class="feature-card"><i class="ti ti-search" aria-hidden="true"></i><div class="t">ScamShield</div><div class="d">Checks a listing before you pay anything.</div></div>
+      <div class="feature-card"><i class="ti ti-file-text" aria-hidden="true"></i><div class="t">ContractScan AI</div><div class="d">Flags risky clauses in seconds.</div></div>
+      <div class="feature-card"><i class="ti ti-scale" aria-hidden="true"></i><div class="t">RightsGuide</div><div class="d">Plain-English tenant rights, 24/7.</div></div>
+      <div class="feature-card"><i class="ti ti-users" aria-hidden="true"></i><div class="t">FamilyConnect</div><div class="d">Translated family summaries.</div></div>
+    </div>
+  </div>
+
+  <div class="landing-section">
+    <div class="section-lbl">An example of what we catch</div>
+    <div class="example-card">
+      <div class="ex-kicker"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Joint &amp; several liability</div>
+      <div class="ex-t">"If one flatmate can't pay, you can legally be asked to cover their share."</div>
+      <div class="ex-d">The kind of clause NestSafe flags in seconds — easy to miss reading a contract yourself.</div>
+    </div>
+  </div>
+
+  <div class="landing-section">
+    <div class="section-lbl">Why NestSafe</div>
+    <div class="diff-card">
+      <div class="k">Free for every student</div>
+      <div class="t">Paid for by your university, not by you.</div>
+      <div class="d">General tools help you personally. NestSafe is built so your university can see accommodation risks too, so problems get caught before they become a pattern.</div>
+    </div>
+  </div>
+
+  <div class="landing-footer">
+    <div class="flinks"><span>Privacy</span><span>Security</span><span>Contact</span></div>
+    <div class="copy">© 2026 NestSafe AI</div>
+  </div>
 </div>
 
 <!-- SCREEN 2: SITUATION -->
@@ -359,7 +442,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
   </div>
   <div class="bottom-tip fade-up-2">
     <i class="ti ti-shield-check" aria-hidden="true"></i>
-    <span>Over £1M lost to student rental scams in the UK every year. Checking first is always the right decision.</span>
+    <span>Nearly £9M was lost to UK rental fraud last year, around £1,800 per case on average, and 18-29 year olds made up nearly half of all reports. Checking first is always the right decision.</span>
   </div>
 </div>
 
@@ -856,7 +939,7 @@ async function checkScam() {
   btn.disabled=true;btn.textContent='Checking...';
   showLoading('scamResult','Checking for known UK rental scam patterns...');
   try {
-    const sys = 'You are a UK rental fraud expert. Over £1M is lost to student rental scams in the UK every year. Be direct, honest and always act in the student\'s best interest.';
+    const sys = 'You are a UK rental fraud expert. Nearly £9M was lost to rental fraud in the UK last year, around £1,800 per case on average, with 18-29 year olds accounting for nearly half of all reported cases. Be direct, honest and always act in the student\'s best interest.';
     let platformNote = '';
     if(platform){
       const note = platform === 'Facebook Marketplace'
@@ -1065,6 +1148,30 @@ async function sendChat() {
     addChatMsg(reply, false);
   } catch(e){ document.getElementById('typing')?.remove(); addChatMsg('Sorry, I could not connect. Please try again.', false); }
 }
+const TICKER_STATS = [
+  {text:'<b>1.3M</b> new students started UK uni in 2023/24.', src:'Source: HESA'},
+  {text:'The <b>Renters\' Rights Act 2025</b> is now in force across England.', src:'Source: UK Government'},
+  {text:'Nearly <b>£9M</b> lost to UK rental fraud last year, around <b>£1,800</b> per case on average.', src:'Source: UK Government / NFIB (average calculated from total loss and case count)'},
+  {text:'<b>70%</b> say rent has hurt their health.', src:'Source: Save the Student, National Student Accommodation Survey 2026'},
+  {text:'<b>36%</b> have considered dropping out over rent.', src:'Source: Save the Student, National Student Accommodation Survey 2026'},
+  {text:'<b>38%</b> say housing problems hurt their studies.', src:'Source: Save the Student, National Student Accommodation Survey 2026'},
+  {text:'<b>58%</b> borrowed money just to pay rent.', src:'Source: Save the Student, National Student Accommodation Survey 2026'},
+  {text:'<b>35%</b> rented a property without viewing it first.', src:'Source: Save the Student, National Student Accommodation Survey 2026'},
+  {text:'<b>8%</b> of students have experienced homelessness.', src:'Source: Save the Student, National Student Accommodation Survey 2026'},
+  {text:'<b>39%</b> admit to signing contracts they don\'t understand.', src:'Source: Weightmans survey, via The Negotiator (2024, UK tenants)'}
+];
+let tickerIdx = 0, tickerTimer = null;
+function renderTickerStat(){
+  const el = document.getElementById('statTickerText');
+  if(!el) return;
+  const s = TICKER_STATS[tickerIdx];
+  el.style.opacity = 0;
+  setTimeout(() => { el.innerHTML = s.text + '<span class="src">' + s.src + '</span>'; el.style.opacity = 1; }, 300);
+  tickerIdx = (tickerIdx + 1) % TICKER_STATS.length;
+}
+renderTickerStat();
+if(tickerTimer) clearInterval(tickerTimer);
+tickerTimer = setInterval(renderTickerStat, 5000);
 </script>
 </body>
 </html>
