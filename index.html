@@ -551,6 +551,48 @@ let lastContractScreen = 'contract';
 const SAMPLE_CONTRACT = `The tenant shall be responsible for all internal repairs costing under £200 including boiler servicing and maintenance. The landlord reserves the right to enter the property with 12 hours written notice at any reasonable time. A non-refundable administration fee of £250 is payable upon signing. The tenant agrees to pay a professional cleaning fee of £300 upon vacating the property regardless of its condition. The deposit of £1,800 may be withheld in full at the landlord's sole discretion if any damage is found. The tenant waives the right to challenge any rent increase proposed by the landlord.`;
 const SAMPLE_SCAM = `I found a 2 bedroom flat in Shoreditch on Facebook Marketplace for £750 per month. The landlord said they are currently working abroad and cannot meet in person. They sent photos and a contract by email. I need to pay two months deposit of £1,500 by bank transfer today and they will post the keys to me. They said three other students are interested and I need to decide by tonight.`;
 
+// DEMO SAFETY NET
+// If the venue wifi drops or the live API call fails during a pitch, these give a graceful
+// fallback instead of a raw error screen. They ONLY ever fire for the exact built-in sample
+// text (never for anything a real user typed or pasted), so nobody sees fabricated results
+// for their own contract or listing. Add ?demo=1 to the URL to force this on deliberately.
+let DEMO_MODE = new URLSearchParams(location.search).get('demo') === '1';
+let lastCallUsedFallback = false;
+const CANNED_CONTRACT_RESULT = `RED: Non-refundable administration fee :: Charging a £250 admin fee is illegal under the Tenant Fees Act 2019. You cannot be made to pay this.
+RED: Entry with 12 hours notice :: The legal minimum is 24 hours written notice. Twelve hours is not enough and you can refuse entry on this basis.
+RED: Deposit withheld at landlord's sole discretion :: Deductions must be evidenced and the deposit protected in a government scheme, not decided unilaterally by the landlord.
+RED: Waiving the right to challenge rent increases :: This clause is unenforceable. The Renters Rights Act 2025 guarantees your right to challenge unfair rent increases at a tribunal.
+AMBER: Boiler servicing and repairs under £200 :: Boiler maintenance is usually the landlord's legal responsibility. Making you pay for it may breach the Landlord and Tenant Act 1985.
+AMBER: Mandatory £300 cleaning fee regardless of condition :: Blanket cleaning fees regardless of condition are hard to enforce and are often challenged successfully in deposit disputes.
+
+## Summary
+This tenancy agreement contains four clauses that are likely illegal and two that are unfair, putting you at serious financial risk before you even move in.
+
+## Three questions to ask your landlord before signing
+- Will you remove the £250 administration fee, given that charging it is illegal under the Tenant Fees Act 2019?
+- Can you confirm in writing that the deposit will be protected in a government scheme with evidenced deductions only?
+- Will you update the entry notice clause to the legal minimum of 24 hours written notice?
+
+## Your rights under the Renters Rights Act 2025 that apply here
+- You have the right to challenge unfair rent increases at a tribunal, and cannot be made to waive this right in advance.
+- Landlords must give at least 24 hours written notice before entering your home except in emergencies.`;
+
+const CANNED_SCAM_RESULT = `RED: HIGH SCAM RISK :: Every major red flag is present, including an absent landlord, upfront bank transfer, artificial urgency, and no in person viewing.
+
+## Scam indicators found
+- Landlord claims to be abroad and refuses to meet in person or show the property live.
+- Payment requested by direct bank transfer before any viewing or contract signing.
+- Artificial urgency created by claiming multiple other interested students and a same day deadline.
+- Keys promised to be posted, which no legitimate UK letting arrangement does.
+
+## The financial risk
+You could lose the full £1,500 deposit with no legal recourse and no property to show for it.
+
+## What to do right now
+- Do not transfer any money until you have viewed the property in person or via a verified video call with the landlord present.
+- Search the address on Rightmove or Land Registry to confirm who actually owns or lets the property.
+- Report the listing to Facebook Marketplace and to Action Fraud if these details are confirmed.`;
+
 // NAVIGATION
 function goToScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -619,15 +661,26 @@ function sanitizeText(text) {
   return text.replace(/[ \t]*[\u2014\u2013][ \t]*/g, ' ').replace(/[ \t]{2,}/g, ' ').replace(/\r\n/g, '\n').trim();
 }
 const NO_DASH_RULE = ' Never use em dashes or en dashes anywhere in your response, even as punctuation between clauses or asides. Use commas, colons, or separate sentences instead.';
-async function callClaude(system, user, maxTokens=1000) {
-  const r = await fetch('/.netlify/functions/claude-proxy', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({system:system+NO_DASH_RULE,messages:[{role:'user',content:user}],maxTokens})
-  });
-  if(!r.ok) throw new Error('API error '+r.status);
-  const d = await r.json();
-  return sanitizeText(d.content.map(b=>b.text||'').join(''));
+async function callClaude(system, user, maxTokens=1000, cannedFallback=null) {
+  lastCallUsedFallback = false;
+  if(DEMO_MODE && cannedFallback){ lastCallUsedFallback = true; return sanitizeText(cannedFallback); }
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=>controller.abort(), 30000);
+    const r = await fetch('/.netlify/functions/claude-proxy', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system:system+NO_DASH_RULE,messages:[{role:'user',content:user}],maxTokens}),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if(!r.ok) throw new Error('API error '+r.status);
+    const d = await r.json();
+    return sanitizeText(d.content.map(b=>b.text||'').join(''));
+  } catch(e) {
+    if(cannedFallback){ lastCallUsedFallback = true; return sanitizeText(cannedFallback); }
+    throw e;
+  }
 }
 
 async function handleContractPdfUpload(event) {
@@ -695,9 +748,10 @@ One sentence plain English summary.
 
 Tenancy text:
 ${text}`;
-    const result = await callClaude(sys, prompt);
+    const canned = (text === SAMPLE_CONTRACT.trim()) ? CANNED_CONTRACT_RESULT : null;
+    const result = await callClaude(sys, prompt, 1000, canned);
     lastContractResult = result;
-    document.getElementById('contractResult').innerHTML = renderContractResult(result);
+    document.getElementById('contractResult').innerHTML = renderContractResult(result) + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e) { showError('contractResult','Something went wrong.'); }
   finally { btn.disabled=false; btn.textContent='Check if this contract is safe to sign'; }
 }
@@ -830,9 +884,10 @@ Then write:
 
 ${platformNote}Situation:
 ${situationText}`;
-    const result = await callClaude(sys, prompt);
+    const canned = (text === SAMPLE_SCAM.trim() && !link) ? CANNED_SCAM_RESULT : null;
+    const result = await callClaude(sys, prompt, 1000, canned);
     lastScamResult = result;
-    document.getElementById('scamResult').innerHTML = renderScamResult(result);
+    document.getElementById('scamResult').innerHTML = renderScamResult(result) + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e){showError('scamResult','');}
   finally{btn.disabled=false;btn.textContent='Check if this listing is real';}
 }
