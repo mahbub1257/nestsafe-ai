@@ -255,11 +255,11 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .disclaimer{font-size:0.72rem;color:#374151;line-height:1.6;text-align:center;margin-top:1rem;}
 
 /* CHAT */
-#chatToggle{position:fixed;bottom:24px;right:20px;width:52px;height:52px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;box-shadow:0 4px 16px rgba(26,122,74,0.35);transition:all 0.2s;}
-#chatToggle:hover{background:#145C37;transform:scale(1.05);}
+#chatToggle{position:fixed;bottom:24px;right:20px;width:52px;height:52px;background:var(--lime);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;box-shadow:0 4px 16px rgba(0,255,135,0.35);transition:all 0.2s;}
+#chatToggle:hover{background:#00E67A;transform:scale(1.05);}
 #chatWindow{display:none;position:fixed;bottom:88px;right:16px;width:300px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.3);animation:fadeUp 0.2s ease;}
 .chat-head{background:var(--ink);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-.chat-avatar{width:30px;height:30px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-avatar{width:30px;height:30px;background:var(--lime);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .chat-info .cn{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--white);}
 .chat-info .cs{font-size:10px;color:var(--lime);}
 .chat-close{cursor:pointer;color:var(--muted);font-size:16px;}
@@ -268,7 +268,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .msg-user{flex-direction:row-reverse;}
 .msg-bubble-ai{background:var(--card);border:1px solid var(--border);border-radius:10px;border-bottom-left-radius:2px;padding:8px 10px;max-width:82%;font-size:11px;color:rgba(255,255,255,0.85);line-height:1.6;}
 .msg-bubble-user{background:var(--green);border-radius:10px;border-bottom-right-radius:2px;padding:8px 10px;max-width:82%;font-size:11px;color:var(--white);line-height:1.6;}
-.msg-avatar{width:24px;height:24px;background:var(--green);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.msg-avatar{width:24px;height:24px;background:var(--lime);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .chat-input{padding:8px 10px;border-top:1px solid var(--border);background:var(--card);display:flex;gap:7px;}
 .chat-input input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--white);background:#0D1117;font-family:'Inter',inherit;}
 .chat-input input:focus{outline:none;border-color:var(--lime);}
@@ -724,19 +724,20 @@ textarea::placeholder,input::placeholder{color:#374151;}
 </div>
 <!-- CHAT -->
 <div id="chatToggle" onclick="toggleChat()" role="button" tabindex="0" aria-label="Open chat with NestSafe AI" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChat();}">
-  <i class="ti ti-message-circle" id="chatIcon" style="font-size:22px;color:var(--white);" aria-hidden="true"></i>
+  <span id="chatLogoIcon" style="display:flex;"><svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg></span>
+  <i class="ti ti-x" id="chatIcon" style="font-size:22px;color:#0D1117;display:none;" aria-hidden="true"></i>
 </div>
 <div id="chatWindow">
   <div class="chat-head">
     <div style="display:flex;align-items:center;gap:8px;">
-      <div class="chat-avatar"><i class="ti ti-shield-check" style="font-size:14px;color:var(--white);" aria-hidden="true"></i></div>
+      <div class="chat-avatar"><svg width="16" height="16" viewBox="0 0 512 512" aria-hidden="true"><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg></div>
       <div class="chat-info"><div class="cn">NestSafe AI</div><div class="cs">Online — replies in seconds</div></div>
     </div>
     <div class="chat-close" onclick="toggleChat()" role="button" tabindex="0" aria-label="Close chat" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChat();}"><i class="ti ti-x" aria-hidden="true"></i></div>
   </div>
   <div id="chatMsgs" class="chat-msgs">
     <div class="msg-ai">
-      <div class="msg-avatar"><i class="ti ti-shield-check" style="font-size:11px;color:var(--white);" aria-hidden="true"></i></div>
+      <div class="msg-avatar"><svg width="13" height="13" viewBox="0 0 512 512" aria-hidden="true"><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg></div>
       <div class="msg-bubble-ai">Hi! Ask me anything about your tenancy, your rights, or any housing concern. I reply in any language.</div>
     </div>
   </div>
@@ -1360,14 +1361,15 @@ let chatIsOpen = false;
 function toggleChat() {
   chatIsOpen = !chatIsOpen;
   document.getElementById('chatWindow').style.display = chatIsOpen?'block':'none';
-  document.getElementById('chatIcon').className = chatIsOpen?'ti ti-x':'ti ti-message-circle';
+  document.getElementById('chatLogoIcon').style.display = chatIsOpen?'none':'flex';
+  document.getElementById('chatIcon').style.display = chatIsOpen?'block':'none';
   if(chatIsOpen) setTimeout(()=>document.getElementById('chatInput').focus(),100);
 }
 function addChatMsg(text, isUser) {
   const msgs = document.getElementById('chatMsgs');
   const div = document.createElement('div');
   div.className = isUser?'msg-user':'msg-ai';
-  if(!isUser) div.innerHTML = `<div class="msg-avatar"><i class="ti ti-shield-check" style="font-size:11px;color:var(--white);" aria-hidden="true"></i></div><div class="msg-bubble-ai">${text}</div>`;
+  if(!isUser) div.innerHTML = `<div class="msg-avatar"><svg width="13" height="13" viewBox="0 0 512 512" aria-hidden="true"><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg></div><div class="msg-bubble-ai">${text}</div>`;
   else div.innerHTML = `<div class="msg-bubble-user">${text}</div>`;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
@@ -1381,7 +1383,7 @@ async function sendChat() {
   chatHistory.push({role:'user',content:text});
   const typing = document.createElement('div');
   typing.className='msg-ai';typing.id='typing';
-  typing.innerHTML='<div class="msg-avatar"><i class="ti ti-shield-check" style="font-size:11px;color:var(--white);" aria-hidden="true"></i></div><div class="msg-bubble-ai" style="color:var(--muted);">Thinking...</div>';
+  typing.innerHTML='<div class="msg-avatar"><svg width="13" height="13" viewBox="0 0 512 512" aria-hidden="true"><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg></div><div class="msg-bubble-ai" style="color:var(--muted);">Thinking...</div>';
   document.getElementById('chatMsgs').appendChild(typing);
   document.getElementById('chatMsgs').scrollTop = 999999;
   try {
