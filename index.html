@@ -29,6 +29,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--
 
 /* HEADER */
 header{background:var(--ink);padding:0.85rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);}
+.logo-wrap{display:flex;align-items:center;gap:9px;}
 .logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--white);letter-spacing:-0.5px;}
 .logo span{color:var(--lime);}
 .header-right{display:flex;align-items:center;gap:8px;position:relative;}
@@ -303,7 +304,10 @@ textarea::placeholder,input::placeholder{color:#374151;}
 <body>
 
 <header>
-  <div class="logo">Nest<span>Safe</span> AI</div>
+  <div class="logo-wrap">
+    <svg width="28" height="28" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="140" fill="#00FF87"/><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg>
+    <div class="logo">Nest<span>Safe</span> AI</div>
+  </div>
   <div class="header-right">
     <div id="loginBtn" onclick="toggleDropdown()">
       <i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i>
@@ -445,6 +449,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
 
 <!-- SCREEN 2: SITUATION -->
 <div id="screen-situation" class="screen">
+  <div class="back-link" onclick="goBack('mood')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
   <div class="fade-up" style="text-align:center;padding:1.5rem 0 1.25rem;">
     <div class="mood-title" style="font-size:1.3rem;">Where are you in your<br>housing journey?</div>
     <div class="mood-sub" style="margin-top:0.4rem;">We will take you straight to the right tool.</div>
@@ -767,9 +772,9 @@ function quickRight(q) { document.getElementById('rightsQ').value = q; askRights
 // API
 function sanitizeText(text) {
   if(!text) return text;
-  return text.replace(/[ \t]*[\u2014\u2013][ \t]*/g, ' ').replace(/[ \t]{2,}/g, ' ').replace(/\r\n/g, '\n').trim();
+  return text.replace(/[ \t]*[\u2014\u2013][ \t]*/g, ' ').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|\n)[ \t]*\*[ \t]+/g, '$1').replace(/[ \t]{2,}/g, ' ').replace(/\r\n/g, '\n').trim();
 }
-const NO_DASH_RULE = ' Never use em dashes or en dashes anywhere in your response, even as punctuation between clauses or asides. Use commas, colons, or separate sentences instead.';
+const NO_DASH_RULE = ' Never use em dashes or en dashes anywhere in your response, even as punctuation between clauses or asides. Use commas, colons, or separate sentences instead. Never use markdown formatting such as asterisks, underscores, or hash symbols; write in plain text only.';
 async function callClaude(system, user, maxTokens=1000, cannedFallback=null) {
   lastCallUsedFallback = false;
   if(DEMO_MODE && cannedFallback){ lastCallUsedFallback = true; return sanitizeText(cannedFallback); }
