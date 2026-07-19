@@ -173,6 +173,22 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .cd-g{background:var(--lgreen);}
 .clause-text{font-size:0.82rem;color:rgba(255,255,255,0.85);line-height:1.4;font-weight:500;}
 .clause-exp{font-size:0.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.footer-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;padding:1.25rem;}
+.footer-modal-overlay.open{display:flex;}
+.footer-modal{background:var(--card);border:1px solid var(--border);border-radius:14px;max-width:340px;width:100%;padding:1.25rem;}
+.footer-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;}
+.footer-modal-head div:first-child{font-size:0.95rem;font-weight:700;color:var(--white);}
+.footer-modal-close{cursor:pointer;color:var(--muted);font-size:16px;}
+.footer-modal-body{font-size:0.82rem;color:var(--muted);line-height:1.6;}
+.footer-modal-body a{color:var(--lime);}
+.signin-modal{background:var(--card);border:1px solid var(--border);border-radius:14px;max-width:300px;width:100%;padding:1.25rem;}
+.signin-modal-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.signin-modal-role{font-size:0.82rem;font-weight:700;color:var(--lime);margin-bottom:14px;}
+.signin-modal-label{font-size:0.7rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;}
+.signin-modal-input{width:100%;box-sizing:border-box;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:0.82rem;color:var(--white);margin-bottom:14px;}
+.signin-modal-actions{display:flex;gap:8px;}
+.signin-modal-actions button{flex:1;}
+#orgNavPill{display:none;align-items:center;gap:5px;background:rgba(0,255,135,0.12);border:1px solid rgba(0,255,135,0.35);color:var(--lime);font-size:0.68rem;font-weight:700;padding:6px 10px;border-radius:7px;cursor:pointer;margin-right:8px;}
 .demo-banner{display:flex;align-items:center;gap:7px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.25);border-radius:9px;padding:0.6rem 0.85rem;font-size:0.74rem;color:#93C5FD;margin-bottom:1rem;}
 .org-header{margin-bottom:1rem;}
 .org-name{font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#4B5563;margin-bottom:2px;}
@@ -345,6 +361,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
     <div class="logo">Nest<span>Safe</span> AI</div>
   </div>
   <div class="header-right">
+    <div id="orgNavPill" onclick="goToScreen('orgdash')" role="button" tabindex="0" aria-label="Go to dashboard" onkeydown="if(event.key==='Enter'||event.key===' '){goToScreen('orgdash')}"><i class="ti ti-layout-dashboard" style="font-size:13px;" aria-hidden="true"></i> Dashboard</div>
     <div id="loginBtn" onclick="toggleDropdown()">
       <i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i>
       <span id="loginLabel">Sign in</span>
@@ -471,7 +488,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
   </div>
 
   <div class="landing-footer">
-    <div class="flinks"><span>Privacy</span><span>Security</span><span>Contact</span></div>
+    <div class="flinks"><span role="button" tabindex="0" onclick="openFooterModal('privacy')" onkeydown="if(event.key==='Enter'||event.key===' '){openFooterModal('privacy')}">Privacy</span><span role="button" tabindex="0" onclick="openFooterModal('security')" onkeydown="if(event.key==='Enter'||event.key===' '){openFooterModal('security')}">Security</span><span role="button" tabindex="0" onclick="openFooterModal('contact')" onkeydown="if(event.key==='Enter'||event.key===' '){openFooterModal('contact')}">Contact</span></div>
     <div class="copy">© 2026 NestSafe AI</div>
   </div>
 </div>
@@ -657,7 +674,6 @@ textarea::placeholder,input::placeholder{color:#374151;}
 
 <!-- SCREEN 8: ORG DASHBOARD (University / Student Union) -->
 <div id="screen-orgdash" class="screen">
-  <div class="back-link" onclick="goToScreen('mood')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
   <div class="demo-banner"><i class="ti ti-info-circle" aria-hidden="true"></i> Example preview, illustrative data, not live figures</div>
   <div class="org-header">
     <div class="org-name" id="orgDashName">University of Cambridge</div>
@@ -688,6 +704,24 @@ textarea::placeholder,input::placeholder{color:#374151;}
   <div id="orgSaveMsg" style="margin-top:0.75rem;"></div>
 </div>
 
+<div id="footerModalOverlay" class="footer-modal-overlay" onclick="if(event.target===this)closeFooterModal()">
+  <div class="footer-modal">
+    <div class="footer-modal-head"><div id="footerModalTitle"></div><div class="footer-modal-close" onclick="closeFooterModal()" role="button" tabindex="0" aria-label="Close" onkeydown="if(event.key==='Enter'||event.key===' '){closeFooterModal()}"><i class="ti ti-x" aria-hidden="true"></i></div></div>
+    <div id="footerModalBody" class="footer-modal-body"></div>
+  </div>
+</div>
+<div id="signinModalOverlay" class="footer-modal-overlay" onclick="if(event.target===this)cancelSignIn()">
+  <div class="signin-modal">
+    <div class="signin-modal-head"><svg width="22" height="22" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="140" fill="#00FF87"/><path d="M172 172h56l84 132V172h56v168h-56l-84-132v132h-56V172z" fill="#0D1117"/></svg><div class="logo" style="font-size:0.9rem;">Nest<span>Safe</span> AI</div></div>
+    <div id="signinModalRole" class="signin-modal-role"></div>
+    <label class="signin-modal-label" for="signinModalName">Your name</label>
+    <input type="text" id="signinModalName" class="signin-modal-input" placeholder="e.g. Sarah Jenkins" onkeydown="if(event.key==='Enter')confirmSignIn()">
+    <div class="signin-modal-actions">
+      <button class="btn-ghost" onclick="cancelSignIn()">Cancel</button>
+      <button class="btn-primary" onclick="confirmSignIn()">Continue</button>
+    </div>
+  </div>
+</div>
 <!-- CHAT -->
 <div id="chatToggle" onclick="toggleChat()" role="button" tabindex="0" aria-label="Open chat with NestSafe AI" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChat();}">
   <i class="ti ti-message-circle" id="chatIcon" style="font-size:22px;color:var(--white);" aria-hidden="true"></i>
@@ -880,7 +914,7 @@ function onScamLinkInput() {
 }
 function setRightsLang(btn,lang) { document.querySelectorAll('#screen-rights .lang-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); rightsLang=lang; }
 function setFamilyLang(btn,lang) { document.querySelectorAll('.family-card .lang-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); familyLang=lang; }
-function quickRight(q) { document.getElementById('rightsQ').value = q; askRights(); }
+function quickRight(q) { const el = document.getElementById('rightsQ'); el.value = q; el.focus(); }
 
 // API
 function sanitizeText(text) {
@@ -1252,6 +1286,19 @@ async function generateEmergencyLetter() {
   finally{btn.disabled=false;btn.textContent='Generate my emergency letter';}
 }
 
+const FOOTER_CONTENT = {
+  privacy: {title:'Privacy', body:'NestSafe AI only processes the contract or listing text you paste or upload, in order to generate your result. Nothing you submit is stored once your session ends, and it is never used to train any AI model. Questions? Use Contact below.'},
+  security: {title:'Security', body:'Your text is sent over an encrypted connection through our secure server proxy to generate your result. The AI provider never receives your name or any identifying details, and we do not keep a copy of what you submit.'},
+  contact: {title:'Contact', body:'Email us at <a href="mailto:mahbub.shuhag1@gmail.com">mahbub.shuhag1@gmail.com</a> with questions, feedback, or partnership enquiries.'}
+};
+function openFooterModal(type) {
+  const c = FOOTER_CONTENT[type];
+  document.getElementById('footerModalTitle').textContent = c.title;
+  document.getElementById('footerModalBody').innerHTML = c.body;
+  document.getElementById('footerModalOverlay').classList.add('open');
+}
+function closeFooterModal() { document.getElementById('footerModalOverlay').classList.remove('open'); }
+
 // LOGIN
 function toggleDropdown() {
   dropOpen = !dropOpen;
@@ -1261,35 +1308,51 @@ function toggleDropdown() {
 function closeDropdown(){ dropOpen=false; document.getElementById('loginDropdown').style.display='none'; document.getElementById('loginChevron').style.transform='rotate(0)'; }
 document.addEventListener('click', e => { if(!document.getElementById('loginBtn').contains(e.target)&&!document.getElementById('loginDropdown').contains(e.target)) closeDropdown(); });
 
+let pendingSignIn = null;
 function signIn(role, label, icon) {
-  const name = prompt('Enter your name to continue:');
-  if(!name){closeDropdown();return;}
-  currentUser = {name:name.trim(),role,label};
-  const initial = name.trim()[0].toUpperCase();
-  document.getElementById('loginBtn').innerHTML = `<div style="width:22px;height:22px;background:rgba(0,255,135,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--lime);">${initial}</div><div style="line-height:1.2;"><div style="font-size:11px;font-weight:600;color:var(--white);">${name.trim().split(' ')[0]}</div><div style="font-size:9px;color:var(--lime);">${label}</div></div><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:rgba(255,255,255,0.4);" aria-hidden="true"></i>`;
-  document.getElementById('siName').textContent = name.trim();
+  pendingSignIn = {role, label};
+  closeDropdown();
+  document.getElementById('signinModalRole').textContent = 'Signing in as ' + label;
+  document.getElementById('signinModalName').value = '';
+  document.getElementById('signinModalOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('signinModalName').focus(), 50);
+}
+function cancelSignIn() { pendingSignIn = null; document.getElementById('signinModalOverlay').classList.remove('open'); }
+function confirmSignIn() {
+  const nameInput = document.getElementById('signinModalName');
+  const name = nameInput.value.trim();
+  if(!name){ nameInput.focus(); return; }
+  const role = pendingSignIn.role, label = pendingSignIn.label;
+  document.getElementById('signinModalOverlay').classList.remove('open');
+  currentUser = {name,role,label};
+  const initial = name[0].toUpperCase();
+  document.getElementById('loginBtn').innerHTML = `<div style="width:22px;height:22px;background:rgba(0,255,135,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--lime);">${initial}</div><div style="line-height:1.2;"><div style="font-size:11px;font-weight:600;color:var(--white);">${name.split(' ')[0]}</div><div style="font-size:9px;color:var(--lime);">${label}</div></div><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:rgba(255,255,255,0.4);" aria-hidden="true"></i>`;
+  document.getElementById('siName').textContent = name;
   document.getElementById('siRole').textContent = 'Signed in as '+label;
   document.getElementById('signedOutMenu').style.display = 'none';
   document.getElementById('signedInMenu').style.display = 'block';
   const dashItem = document.getElementById('siDashboardItem');
+  const navPill = document.getElementById('orgNavPill');
   if(role==='university' || role==='union'){
     dashItem.style.display = 'flex';
+    navPill.style.display = 'flex';
     document.getElementById('siDashboardLabel').textContent = role==='university' ? 'Welfare overview' : 'Campaign data';
     document.getElementById('orgDashName').textContent = role==='university' ? 'University of Cambridge' : 'Oxford SU';
     document.getElementById('orgDashSub').textContent = role==='university' ? 'Welfare overview' : 'Campaign data';
     document.getElementById('orgIssuesLbl').textContent = role==='university' ? 'Most common issues this term' : 'Top issues to campaign on this term';
   } else {
     dashItem.style.display = 'none';
+    navPill.style.display = 'none';
   }
-  closeDropdown();
   const toast = document.createElement('div');
   toast.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;max-width:90vw;text-align:center;';
-  toast.textContent = `Welcome ${name.trim().split(' ')[0]}! Signed in as ${label}.`;
+  toast.textContent = `Welcome ${name.split(' ')[0]}! Signed in as ${label}.`;
   document.body.appendChild(toast);
   setTimeout(()=>toast.remove(),3000);
+  pendingSignIn = null;
   if(role==='university' || role==='union'){ setTimeout(()=>goToScreen('orgdash'), 400); }
 }
-function signOut() { currentUser=null; closeDropdown(); document.getElementById('loginBtn').innerHTML='<i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i><span id="loginLabel">Sign in</span><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:var(--muted);" aria-hidden="true"></i>'; document.getElementById('signedOutMenu').style.display='block'; document.getElementById('signedInMenu').style.display='none'; }
+function signOut() { currentUser=null; closeDropdown(); document.getElementById('loginBtn').innerHTML='<i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i><span id="loginLabel">Sign in</span><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:var(--muted);" aria-hidden="true"></i>'; document.getElementById('signedOutMenu').style.display='block'; document.getElementById('signedInMenu').style.display='none'; document.getElementById('orgNavPill').style.display='none'; }
 function switchRole() { signOut(); setTimeout(()=>toggleDropdown(),100); }
 
 // CHAT
