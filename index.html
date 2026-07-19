@@ -262,6 +262,19 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .example-card .ex-kicker{font-size:0.7rem;font-weight:700;color:var(--text-a);letter-spacing:0.04em;margin-bottom:0.5rem;display:flex;align-items:center;gap:6px;}
 .example-card .ex-t{font-family:'Syne',sans-serif;font-size:0.95rem;color:var(--white);font-weight:600;line-height:1.45;margin-bottom:0.5rem;}
 .example-card .ex-d{font-size:0.76rem;color:var(--muted);line-height:1.55;}
+.chain-box{background:var(--ink);border-radius:10px;padding:0.75rem 0.6rem 0.6rem;margin-top:0.9rem;}
+.chain-lbl{font-size:0.6rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-d);margin-bottom:0.6rem;}
+.chain-row{display:flex;align-items:flex-start;justify-content:space-between;}
+.chain-node{display:flex;flex-direction:column;align-items:center;flex:1;}
+.chain-node .av{width:28px;height:28px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--white);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:0.68rem;margin-bottom:4px;}
+.chain-node.missed .av{background:var(--danger);border-color:var(--danger);}
+.chain-node.you .av{border-color:var(--lime);color:var(--lime);}
+.chain-node .nm{font-size:0.65rem;font-weight:600;color:var(--white);}
+.chain-node .tg{font-size:0.58rem;margin-top:1px;}
+.chain-node.missed .tg{color:var(--text-d);}
+.chain-node:not(.missed) .tg{color:var(--text-a);}
+.chain-link{flex:0.5;height:1px;background:var(--border);margin-top:14px;}
+.chain-impact{font-size:0.72rem;color:var(--text-d);font-weight:600;margin-top:0.7rem;text-align:center;}
 .diff-card{background:var(--card);border:1px solid rgba(0,255,135,0.2);border-radius:12px;padding:1.1rem;}
 .diff-card .k{font-size:0.68rem;font-weight:700;color:var(--lime);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:0.5rem;}
 .diff-card .t{font-family:'Syne',sans-serif;font-size:0.95rem;color:var(--white);font-weight:700;line-height:1.4;margin-bottom:0.5rem;}
@@ -399,6 +412,19 @@ textarea::placeholder,input::placeholder{color:#374151;}
       <div class="ex-kicker"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Joint &amp; several liability</div>
       <div class="ex-t">"If one flatmate can't pay, you can legally be asked to cover their share."</div>
       <div class="ex-d">The kind of clause NestSafe flags in seconds — easy to miss reading a contract yourself.</div>
+      <div class="chain-box">
+        <div class="chain-lbl">Who this affects (example)</div>
+        <div class="chain-row">
+          <div class="chain-node missed"><div class="av">R</div><div class="nm">Riya</div><div class="tg">misses rent</div></div>
+          <div class="chain-link"></div>
+          <div class="chain-node you"><div class="av">Y</div><div class="nm">You</div><div class="tg">liable</div></div>
+          <div class="chain-link"></div>
+          <div class="chain-node"><div class="av">O</div><div class="nm">Omar</div><div class="tg">liable</div></div>
+          <div class="chain-link"></div>
+          <div class="chain-node"><div class="av">L</div><div class="nm">Lucy</div><div class="tg">liable</div></div>
+        </div>
+        <div class="chain-impact">→ Full rent (illustrative: £2,400/mo) can be claimed from any one of you</div>
+      </div>
     </div>
   </div>
 
