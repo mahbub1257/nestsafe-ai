@@ -173,6 +173,25 @@ textarea::placeholder,input::placeholder{color:#374151;}
 .cd-g{background:var(--lgreen);}
 .clause-text{font-size:0.82rem;color:rgba(255,255,255,0.85);line-height:1.4;font-weight:500;}
 .clause-exp{font-size:0.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.demo-banner{display:flex;align-items:center;gap:7px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.25);border-radius:9px;padding:0.6rem 0.85rem;font-size:0.74rem;color:#93C5FD;margin-bottom:1rem;}
+.org-header{margin-bottom:1rem;}
+.org-name{font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#4B5563;margin-bottom:2px;}
+.org-sub{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--white);}
+.org-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.org-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.9rem;}
+.org-stat .v{font-size:1.4rem;font-weight:700;color:var(--white);}
+.org-stat .l{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+.org-stat-danger{background:rgba(239,68,68,0.07);border-color:rgba(239,68,68,0.2);}
+.org-stat-danger .v{color:var(--text-d);}
+.org-stat-danger .l{color:var(--text-d);}
+.org-section-lbl{font-size:0.78rem;font-weight:600;color:var(--white);margin-bottom:0.6rem;}
+.org-issue-list{display:flex;flex-direction:column;gap:7px;margin-bottom:0.5rem;}
+.org-issue{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:0.6rem 0.8rem;font-size:0.78rem;color:rgba(255,255,255,0.85);}
+.org-pct{font-weight:700;}
+.pct-r{color:var(--text-d);}
+.pct-a{color:var(--text-a);}
+.org-field{margin-bottom:0.85rem;}
+.org-field-lbl{font-size:0.72rem;color:var(--muted);margin-bottom:5px;}
 .section-head{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.62rem 0.85rem;margin:0.75rem 0 0.5rem;font-size:0.82rem;font-weight:700;color:var(--white);}
 .section-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.5rem;}
 .section-para{font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0;}
@@ -338,21 +357,13 @@ textarea::placeholder,input::placeholder{color:#374151;}
           <i class="ti ti-school" aria-hidden="true"></i>
           <div><div class="dt">Student</div><div class="ds">Contract scanner and rights guide</div></div>
         </div>
-        <div class="drop-item" onclick="signIn('parent','Parent or family','ti-users')">
-          <i class="ti ti-users" aria-hidden="true"></i>
-          <div><div class="dt">Parent or family</div><div class="ds">Track accommodation safety</div></div>
-        </div>
         <div class="drop-item" onclick="signIn('university','University','ti-building')">
           <i class="ti ti-building" aria-hidden="true"></i>
-          <div><div class="dt">University</div><div class="ds">Institution dashboard</div></div>
+          <div><div class="dt">University</div><div class="ds">Welfare overview and settings</div></div>
         </div>
         <div class="drop-item" onclick="signIn('union','Student union','ti-speakerphone')">
           <i class="ti ti-speakerphone" aria-hidden="true"></i>
-          <div><div class="dt">Student union</div><div class="ds">Welfare dashboard</div></div>
-        </div>
-        <div class="drop-item" onclick="signIn('agent','Recruitment agent','ti-plane')">
-          <i class="ti ti-plane" aria-hidden="true"></i>
-          <div><div class="dt">Recruitment agent</div><div class="ds">Pre-arrival safety module</div></div>
+          <div><div class="dt">Student union</div><div class="ds">Campaign and advocacy data</div></div>
         </div>
       </div>
       <div id="signedInMenu" style="display:none;">
@@ -360,6 +371,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
           <div id="siName" style="font-size:12px;font-weight:600;color:var(--white);"></div>
           <div id="siRole" style="font-size:10px;color:var(--lime);margin-top:1px;"></div>
         </div>
+        <div class="drop-item" id="siDashboardItem" style="display:none;" onclick="goToScreen('orgdash');closeDropdown();"><i class="ti ti-layout-dashboard" aria-hidden="true"></i><div><div class="dt" id="siDashboardLabel">Dashboard</div></div></div>
         <div class="drop-item" onclick="closeDropdown()"><i class="ti ti-user" aria-hidden="true"></i><div><div class="dt">My profile</div></div></div>
         <div class="drop-item" onclick="switchRole()"><i class="ti ti-refresh" aria-hidden="true"></i><div><div class="dt">Switch role</div></div></div>
         <div class="drop-divider"></div>
@@ -633,13 +645,46 @@ textarea::placeholder,input::placeholder{color:#374151;}
     <div class="next-card"><div class="next-icon ni-b"><i class="ti ti-phone" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Citizens Advice</div><div class="ns">Free legal advice — 0800 144 8848</div></div></div>
     <div class="next-card"><div class="next-icon ni-g"><i class="ti ti-phone" style="font-size:15px;color:var(--lime);" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Shelter</div><div class="ns">Housing charity — 0808 800 4444</div></div></div>
     <div class="next-card"><div class="next-icon ni-g"><i class="ti ti-heart" style="font-size:15px;color:var(--lime);" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Student Minds</div><div class="ns">Mental health support — studentminds.org.uk</div></div></div>
-    <div class="next-card"><div class="next-icon ni-b"><i class="ti ti-building" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Your university welfare team</div><div class="ns">Check your university website</div></div></div>
+    <div class="next-card" id="emergencyOrgCard"><div class="next-icon ni-b"><i class="ti ti-building" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div><div class="next-text"><div class="nt">Your university welfare team</div><div class="ns">Check your university website</div></div></div>
   </div>
   <div class="tool-title" style="font-size:1rem;margin-top:1rem;">Generate an emergency letter</div>
   <div class="tool-sub">Describe your situation and we will draft a formal letter you can send to your landlord, university or local council.</div>
   <textarea id="emergencyText" placeholder="Describe your emergency housing situation..."></textarea>
   <button class="btn-primary" onclick="generateEmergencyLetter()" id="emergBtn">Generate my emergency letter</button>
   <div id="emergencyResult" style="margin-top:1rem;"></div>
+</div>
+
+<!-- SCREEN 8: ORG DASHBOARD (University / Student Union) -->
+<div id="screen-orgdash" class="screen">
+  <div class="back-link" onclick="goToScreen('mood')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</div>
+  <div class="demo-banner"><i class="ti ti-info-circle" aria-hidden="true"></i> Example preview, illustrative data, not live figures</div>
+  <div class="org-header">
+    <div class="org-name" id="orgDashName">University of Cambridge</div>
+    <div class="org-sub" id="orgDashSub">Welfare overview</div>
+  </div>
+  <div class="org-stats">
+    <div class="org-stat"><div class="v">86</div><div class="l">Contracts scanned this month</div></div>
+    <div class="org-stat org-stat-danger"><div class="v">31</div><div class="l">Flagged high risk</div></div>
+  </div>
+  <div class="org-section-lbl" id="orgIssuesLbl">Most common issues this term</div>
+  <div class="org-issue-list">
+    <div class="org-issue"><span>Illegal admin fees</span><span class="org-pct pct-r">42%</span></div>
+    <div class="org-issue"><span>Joint and several liability</span><span class="org-pct pct-a">27%</span></div>
+    <div class="org-issue"><span>Short entry notice clauses</span><span class="org-pct pct-a">19%</span></div>
+  </div>
+  <button class="btn-primary" style="margin-top:1.25rem;" onclick="goToScreen('orgsettings')">Edit welfare contact details</button>
+</div>
+
+<!-- SCREEN 9: ORG SETTINGS (welfare contact config, real and saved) -->
+<div id="screen-orgsettings" class="screen">
+  <div class="back-link" onclick="goToScreen('orgdash')"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to overview</div>
+  <div class="tool-title" style="font-size:1.1rem;">Welfare contact details</div>
+  <div class="tool-sub">Shown to your students on the Emergency Help screen instead of a generic message.</div>
+  <div class="org-field"><div class="org-field-lbl">Welfare team name</div><input type="text" id="orgContactName" placeholder="e.g. University of Cambridge Student Support"></div>
+  <div class="org-field"><div class="org-field-lbl">Phone number</div><input type="text" id="orgContactPhone" placeholder="e.g. 01223 337733"></div>
+  <div class="org-field"><div class="org-field-lbl">Email or web link</div><input type="text" id="orgContactEmail" placeholder="e.g. studentsupport@cam.ac.uk"></div>
+  <button class="btn-primary" style="margin-top:0.75rem;" onclick="saveOrgContact()">Save changes</button>
+  <div id="orgSaveMsg" style="margin-top:0.75rem;"></div>
 </div>
 
 <!-- CHAT -->
@@ -729,6 +774,43 @@ function goToScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
   window.scrollTo(0,0);
+  if(id==='orgsettings') loadOrgContactIntoSettings();
+}
+
+// ORG CONTACT (real, saved locally — powers the Emergency screen's welfare card)
+function saveOrgContact() {
+  const name = document.getElementById('orgContactName').value.trim();
+  const phone = document.getElementById('orgContactPhone').value.trim();
+  const email = document.getElementById('orgContactEmail').value.trim();
+  localStorage.setItem('nestsafe_org_contact', JSON.stringify({name,phone,email}));
+  document.getElementById('orgSaveMsg').innerHTML = '<div style="font-size:0.78rem;color:var(--lime);">Saved. Students will now see these details on the Emergency screen.</div>';
+  renderEmergencyOrgContact();
+}
+function loadOrgContactIntoSettings() {
+  const raw = localStorage.getItem('nestsafe_org_contact');
+  if(!raw) return;
+  try {
+    const c = JSON.parse(raw);
+    document.getElementById('orgContactName').value = c.name||'';
+    document.getElementById('orgContactPhone').value = c.phone||'';
+    document.getElementById('orgContactEmail').value = c.email||'';
+  } catch(e){}
+}
+function renderEmergencyOrgContact() {
+  const raw = localStorage.getItem('nestsafe_org_contact');
+  const el = document.getElementById('emergencyOrgCard');
+  if(!el) return;
+  let name = 'Your university welfare team', sub = 'Check your university website';
+  if(raw){
+    try {
+      const c = JSON.parse(raw);
+      if(c.name || c.phone || c.email){
+        name = c.name || name;
+        sub = [c.phone,c.email].filter(Boolean).join(' \u00b7 ') || sub;
+      }
+    } catch(e){}
+  }
+  el.innerHTML = `<div class="next-icon ni-b"><i class="ti ti-building" style="font-size:15px;color:#60A5FA;" aria-hidden="true"></i></div><div class="next-text"><div class="nt">${name}</div><div class="ns">${sub}</div></div>`;
 }
 
 function goBack(to) { goToScreen(to); }
@@ -1170,12 +1252,23 @@ function signIn(role, label, icon) {
   document.getElementById('siRole').textContent = 'Signed in as '+label;
   document.getElementById('signedOutMenu').style.display = 'none';
   document.getElementById('signedInMenu').style.display = 'block';
+  const dashItem = document.getElementById('siDashboardItem');
+  if(role==='university' || role==='union'){
+    dashItem.style.display = 'flex';
+    document.getElementById('siDashboardLabel').textContent = role==='university' ? 'Welfare overview' : 'Campaign data';
+    document.getElementById('orgDashName').textContent = role==='university' ? 'University of Cambridge' : 'Oxford SU';
+    document.getElementById('orgDashSub').textContent = role==='university' ? 'Welfare overview' : 'Campaign data';
+    document.getElementById('orgIssuesLbl').textContent = role==='university' ? 'Most common issues this term' : 'Top issues to campaign on this term';
+  } else {
+    dashItem.style.display = 'none';
+  }
   closeDropdown();
   const toast = document.createElement('div');
   toast.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;max-width:90vw;text-align:center;';
   toast.textContent = `Welcome ${name.trim().split(' ')[0]}! Signed in as ${label}.`;
   document.body.appendChild(toast);
   setTimeout(()=>toast.remove(),3000);
+  if(role==='university' || role==='union'){ setTimeout(()=>goToScreen('orgdash'), 400); }
 }
 function signOut() { currentUser=null; closeDropdown(); document.getElementById('loginBtn').innerHTML='<i class="ti ti-user" style="font-size:14px;color:var(--white);" aria-hidden="true"></i><span id="loginLabel">Sign in</span><i class="ti ti-chevron-down" id="loginChevron" style="font-size:11px;color:var(--muted);" aria-hidden="true"></i>'; document.getElementById('signedOutMenu').style.display='block'; document.getElementById('signedInMenu').style.display='none'; }
 function switchRole() { signOut(); setTimeout(()=>toggleDropdown(),100); }
@@ -1240,6 +1333,7 @@ function renderTickerStat(){
   setTimeout(() => { el.innerHTML = s.text + '<span class="src">' + s.src + '</span>'; el.style.opacity = 1; }, 300);
   tickerIdx = (tickerIdx + 1) % TICKER_STATS.length;
 }
+renderEmergencyOrgContact();
 renderTickerStat();
 if(tickerTimer) clearInterval(tickerTimer);
 tickerTimer = setInterval(renderTickerStat, 5000);
