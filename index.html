@@ -651,6 +651,7 @@ textarea::placeholder,input::placeholder{color:#374151;}
   <div class="tool-sub">Describe your situation and we will draft a formal letter you can send to your landlord, university or local council.</div>
   <textarea id="emergencyText" placeholder="Describe your emergency housing situation..."></textarea>
   <button class="btn-primary" onclick="generateEmergencyLetter()" id="emergBtn">Generate my emergency letter</button>
+  <button class="btn-ghost" onclick="document.getElementById('emergencyText').value=SAMPLE_EMERGENCY">Load a sample situation to try first</button>
   <div id="emergencyResult" style="margin-top:1rem;"></div>
 </div>
 
@@ -768,6 +769,19 @@ You could lose the full £1,500 deposit with no legal recourse and no property t
 - Do not transfer any money until you have viewed the property in person or via a verified video call with the landlord present.
 - Search the address on Rightmove or Land Registry to confirm who actually owns or lets the property.
 - Report the listing to Facebook Marketplace and to Action Fraud if these details are confirmed.`;
+
+const CANNED_RIGHTS_ANSWERS = {
+  "Can my landlord enter my flat without giving me notice?": "No. Your landlord must give at least 24 hours written notice before entering your home, except in a genuine emergency. This is a legal requirement, and you can refuse entry if proper notice has not been given.",
+  "What is the maximum legal deposit my landlord can charge?": "For annual rent under £50,000, the legal maximum deposit is 5 weeks' rent. If your landlord asks for more than that, you can challenge it and get the excess back.",
+  "Can I challenge a rent increase from my landlord?": "Yes. Under the Renters Rights Act 2025, you can challenge a rent increase you believe is unfair at a First-tier Tribunal, and you cannot be made to waive this right in advance.",
+  "What happens if my landlord does not fix a repair?": "Landlords must legally keep the property in good repair under the Landlord and Tenant Act 1985. If they do not act, you can report it to your local council's environmental health team, who can force repairs."
+};
+const CANNED_NEXT_QUESTIONS = "1. Will you remove the £250 administration fee, given that charging it is illegal under the Tenant Fees Act 2019?\n2. Can you confirm in writing that the deposit will be protected in a government scheme with evidenced deductions only?\n3. Will you update the entry notice clause to the legal minimum of 24 hours written notice?";
+const CANNED_NEXT_RIGHTS = "You have the right to challenge unfair rent increases at a tribunal, and cannot be made to waive this right in advance. Landlords must give at least 24 hours written notice before entering your home except in emergencies.";
+const CANNED_LETTER = "Dear Landlord,\n\nI am writing regarding the tenancy agreement for the above property. Having reviewed the contract, I would like to raise the following concerns before signing.\n\nThe £250 administration fee is not permitted under the Tenant Fees Act 2019 and I ask that it be removed. I also ask that the deposit be protected in a government-approved scheme, with any deductions evidenced rather than decided unilaterally. Finally, the notice period for entry should be updated to the legal minimum of 24 hours in writing.\n\nI am keen to proceed once these points are addressed and would appreciate written confirmation.\n\nYours sincerely,\nA prospective tenant";
+const CANNED_FAMILY_MESSAGE = "Hi! Just wanted to let you know I have checked my new tenancy agreement using NestSafe AI. The contract has been scanned, I understand my deposit rights, and I know what to do under the Renters Rights Act 2025 if anything comes up. Everything is on track, will keep you posted.";
+const SAMPLE_EMERGENCY = `My landlord has told me I need to leave my flat within 48 hours because he wants to sell the property, but my tenancy agreement runs until next August and I have paid rent in full. I have nowhere else to go and my university is 3 hours away from my family home.`;
+const CANNED_EMERGENCY_LETTER = "Dear Landlord,\n\nI am writing regarding your recent request that I vacate the property within 48 hours. My tenancy agreement runs until next August and my rent is paid in full, so this request does not comply with UK law.\n\nUnder the Renters Rights Act 2025, a landlord cannot evict a tenant without following the correct legal process, which requires proper written notice and, where necessary, a possession order from the court. A wish to sell the property does not remove this requirement.\n\nI am willing to discuss the sale process with you, but I will not be vacating within 48 hours as this would be an unlawful eviction. I have made Citizens Advice and my university welfare team aware of this situation.\n\nYours sincerely,\nA current tenant";
 
 // NAVIGATION
 function goToScreen(id) {
@@ -1177,8 +1191,9 @@ async function askRights() {
   showLoading('rightsResult',`Getting your answer in ${LANGS[rightsLang]}...`);
   try {
     const sys = `You are a UK tenancy law expert. Answer in ${LANGS[rightsLang]} in plain everyday language. Keep under 100 words. Reference the Renters Rights Act 2025 where relevant. Be direct and practical.`;
-    const result = await callClaude(sys, `UK tenant rights question: ${q}`);
-    document.getElementById('rightsResult').innerHTML = `<div class="card" style="background:rgba(0,255,135,0.04);border-color:rgba(0,255,135,0.15);"><div style="font-size:0.75rem;font-weight:600;color:var(--lime);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em;">Your answer in ${LANGS[rightsLang]}</div><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>`;
+    const canned = (rightsLang==='en' && CANNED_RIGHTS_ANSWERS[q]) ? CANNED_RIGHTS_ANSWERS[q] : null;
+    const result = await callClaude(sys, `UK tenant rights question: ${q}`, 1000, canned);
+    document.getElementById('rightsResult').innerHTML = `<div class="card" style="background:rgba(0,255,135,0.04);border-color:rgba(0,255,135,0.15);"><div style="font-size:0.75rem;font-weight:600;color:var(--lime);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em;">Your answer in ${LANGS[rightsLang]}</div><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>` + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e){showError('rightsResult','Could not get your answer.');}
   finally{btn.disabled=false;btn.textContent='Get my answer';}
 }
@@ -1186,26 +1201,28 @@ async function askRights() {
 // NEXT STEPS
 async function showNextSection(type) {
   const el = document.getElementById('nextSectionResult');
+  const wasDemo = lastCallUsedFallback;
   showLoading('nextSectionResult', type==='questions'?'Generating your landlord questions...':'Loading your rights...');
   try {
     let result;
     if(type==='questions') {
       const sys = 'You are a UK tenancy law expert. Generate three specific questions a student should ask their landlord before signing. Be direct and practical. Format as a numbered list.';
-      result = await callClaude(sys, `Based on these contract concerns: ${lastContractResult.substring(0,500)}`);
+      result = await callClaude(sys, `Based on these contract concerns: ${lastContractResult.substring(0,500)}`, 1000, wasDemo?CANNED_NEXT_QUESTIONS:null);
     } else {
       const sys = 'You are a UK tenancy law expert. List two to three key rights under the Renters Rights Act 2025 that apply to a student in a typical tenancy. Plain English. Short.';
-      result = await callClaude(sys, 'What are my key rights as a student tenant under the Renters Rights Act 2025?');
+      result = await callClaude(sys, 'What are my key rights as a student tenant under the Renters Rights Act 2025?', 1000, wasDemo?CANNED_NEXT_RIGHTS:null);
     }
-    el.innerHTML = `<div class="card"><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>`;
+    el.innerHTML = `<div class="card"><div style="font-size:0.85rem;color:var(--white);line-height:1.7;">${result.replace(/\n/g,'<br>')}</div></div>` + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e){showError('nextSectionResult','Could not load this section.');}
 }
 
 async function generateLetter() {
+  const wasDemo = lastCallUsedFallback;
   showLoading('nextSectionResult','Generating your formal letter...');
   try {
     const sys = 'You are a UK housing solicitor. Write a formal but firm letter from a tenant to a landlord challenging illegal clauses. Reference UK law. Under 200 words.';
-    const result = await callClaude(sys, `Write a formal letter challenging these contract issues: ${lastContractResult.substring(0,400)}`);
-    document.getElementById('nextSectionResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>`;
+    const result = await callClaude(sys, `Write a formal letter challenging these contract issues: ${lastContractResult.substring(0,400)}`, 1000, wasDemo?CANNED_LETTER:null);
+    document.getElementById('nextSectionResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>` + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e){showError('nextSectionResult','Could not load this section.');}
 }
 
@@ -1213,9 +1230,10 @@ async function shareWithFamily() {
   showLoading('familyResult',`Creating family summary in ${LANGS[familyLang]}...`);
   try {
     const sys = `You are NestSafe AI. Write a short reassuring WhatsApp message in ${LANGS[familyLang]} to a student's family. Under 80 words. Warm and reassuring.`;
-    const result = await callClaude(sys, `Write a WhatsApp message to a student's family confirming their child's UK accommodation has been checked by NestSafe AI. Mention the contract was scanned, deposit rights are understood, and the student knows their rights under the Renters Rights Act 2025. Write in ${LANGS[familyLang]}.`);
+    const canned = familyLang==='en' ? CANNED_FAMILY_MESSAGE : null;
+    const result = await callClaude(sys, `Write a WhatsApp message to a student's family confirming their child's UK accommodation has been checked by NestSafe AI. Mention the contract was scanned, deposit rights are understood, and the student knows their rights under the Renters Rights Act 2025. Write in ${LANGS[familyLang]}.`, 1000, canned);
     const encoded = encodeURIComponent(result);
-    document.getElementById('familyResult').innerHTML = `<div style="background:rgba(0,255,135,0.05);border:1px solid rgba(0,255,135,0.12);border-radius:10px;padding:0.85rem;font-size:0.82rem;color:var(--white);line-height:1.7;margin-bottom:0.75rem;">${result.replace(/\n/g,'<br>')}</div><a href="https://wa.me/?text=${encoded}" target="_blank"><button class="wa-btn"><i class="ti ti-brand-whatsapp" style="font-size:16px;" aria-hidden="true"></i> Open in WhatsApp</button></a>`;
+    document.getElementById('familyResult').innerHTML = `<div style="background:rgba(0,255,135,0.05);border:1px solid rgba(0,255,135,0.12);border-radius:10px;padding:0.85rem;font-size:0.82rem;color:var(--white);line-height:1.7;margin-bottom:0.75rem;">${result.replace(/\n/g,'<br>')}</div><a href="https://wa.me/?text=${encoded}" target="_blank"><button class="wa-btn"><i class="ti ti-brand-whatsapp" style="font-size:16px;" aria-hidden="true"></i> Open in WhatsApp</button></a>` + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e){showError('familyResult','Could not create the family summary.');}
 }
 
@@ -1227,8 +1245,9 @@ async function generateEmergencyLetter() {
   showLoading('emergencyResult','Generating your emergency letter...');
   try {
     const sys = 'You are a UK housing solicitor. Write a formal emergency letter for a student in a housing crisis. Reference relevant UK law. Under 250 words.';
-    const result = await callClaude(sys, `Emergency housing letter for: ${text}`);
-    document.getElementById('emergencyResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>`;
+    const canned = (text === SAMPLE_EMERGENCY.trim()) ? CANNED_EMERGENCY_LETTER : null;
+    const result = await callClaude(sys, `Emergency housing letter for: ${text}`, 1000, canned);
+    document.getElementById('emergencyResult').innerHTML = `<div class="card"><div style="font-size:0.82rem;color:var(--white);line-height:1.8;white-space:pre-line;">${result}</div></div>` + (lastCallUsedFallback ? '<div style="margin-top:0.6rem;font-size:0.72rem;color:var(--muted);text-align:center;">Shown from a verified reference example while we reconnect to live AI.</div>' : '');
   } catch(e){showError('emergencyResult','Could not generate your letter.');}
   finally{btn.disabled=false;btn.textContent='Generate my emergency letter';}
 }
